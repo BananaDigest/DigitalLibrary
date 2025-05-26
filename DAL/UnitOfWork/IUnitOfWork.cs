@@ -1,12 +1,17 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+﻿using DAL.Repositories;
+using Domain.Entities;
 using System.Threading.Tasks;
 
 namespace DAL.UnitOfWork
 {
-    internal class IUnitOfWork
+    public interface IUnitOfWork : IDisposable
     {
+        IGenericRepository<Book> Books { get; }
+        IGenericRepository<BookCopy> BookCopies { get; }
+        IGenericRepository<Genre> Genres { get; }
+        IGenericRepository<User> Users { get; }
+        IGenericRepository<Order> Orders { get; }
+
+        Task<int> CommitAsync();
     }
 }

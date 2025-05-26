@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace BLL.DTOs
 {
-    public class CreateBookDto
+    public class UpdateBookDto
     {
         public string Title { get; set; }
         public string Author { get; set; }
@@ -15,5 +15,6 @@ namespace BLL.DTOs
         public int PublicationYear { get; set; }
         public BookType AvailableTypes { get; set; }
         public Guid GenreId { get; set; }
+        public Guid Id { get; set; }
     }
 }

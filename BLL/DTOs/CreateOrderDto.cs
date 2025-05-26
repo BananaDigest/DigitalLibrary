@@ -7,14 +7,11 @@ using System.Threading.Tasks;
 
 namespace BLL.DTOs
 {
-    public class OrderDto
+    public class CreateOrderDto
     {
-        public Guid Id { get; set; }
         public Guid UserId { get; set; }
         public Guid BookId { get; set; }
         public BookType OrderType { get; set; }
         public Guid? BookCopyId { get; set; }
-        public DateTime OrderDate { get; set; }
     }
-
 }

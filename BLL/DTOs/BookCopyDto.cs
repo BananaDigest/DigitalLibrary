@@ -6,7 +6,11 @@ using System.Threading.Tasks;
 
 namespace BLL.DTOs
 {
-    internal class BookCopyDto
+    public class BookCopyDto
     {
+        public Guid Id { get; set; }
+        public Guid BookId { get; set; }
+        public int CopyNumber { get; set; }
+        public bool IsAvailable { get; set; }
     }
 }
