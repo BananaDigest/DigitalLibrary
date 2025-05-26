@@ -1,12 +1,12 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Domain.Enums
 {
-    internal class UserRole
+    public enum UserRole
     {
+        Guest = 0,
+        Registered = 1,
+        Manager = 2,
+        Administrator = 3
     }
 }

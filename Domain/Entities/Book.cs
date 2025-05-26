@@ -1,12 +1,22 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using Domain.Enums;
 
 namespace Domain.Entities
 {
-    internal class Book
+    public class Book
     {
+        public Guid Id { get; set; }
+        public string Title { get; set; }
+        public string Author { get; set; }
+        public string Publisher { get; set; }
+        public int PublicationYear { get; set; }
+
+        public BookType AvailableTypes { get; set; }
+
+        public Guid GenreId { get; set; }
+        public Genre Genre { get; set; }
+
+        public ICollection<BookCopy> Copies { get; set; } = new List<BookCopy>();
     }
 }

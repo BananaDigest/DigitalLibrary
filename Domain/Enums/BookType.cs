@@ -1,12 +1,13 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Domain.Enums
 {
-    internal class BookType
+    [Flags]
+    public enum BookType
     {
+        None = 0,
+        Paper = 1 << 0,
+        Electronic = 1 << 1,
+        Audio = 1 << 2
     }
 }

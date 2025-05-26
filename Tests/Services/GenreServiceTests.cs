@@ -4,9 +4,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Tests
+namespace Tests.Services
 {
-    internal class UserServiceTests
+    internal class GenreServiceTests
     {
     }
 }

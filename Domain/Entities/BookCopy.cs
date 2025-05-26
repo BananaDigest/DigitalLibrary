@@ -1,12 +1,17 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using Domain.Enums;
 
 namespace Domain.Entities
 {
-    internal class BookCopy
+    public class BookCopy
     {
+        public Guid Id { get; set; }
+        public Guid BookId { get; set; }
+        public Book Book { get; set; }
+
+        public int CopyNumber { get; set; }
+
+        public bool IsAvailable { get; set; }
     }
 }
