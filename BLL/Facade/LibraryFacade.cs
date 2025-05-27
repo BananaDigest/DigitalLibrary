@@ -61,6 +61,12 @@ namespace BLL.Facade
             });
         }
 
+        public async Task DeleteBookAsync(Guid bookId)
+        {
+            // тут ти можеш додати будь-яку додаткову логіку (авторизація, логування тощо)
+            await _bookService.DeleteAsync(bookId);
+        }
+
         // 3. Створити замовлення
         public async Task CreateOrderAsync(ActionOrderDto dto)
         {
@@ -76,14 +82,14 @@ namespace BLL.Facade
         // 5. Отримати доступні копії книги
         public async Task<IEnumerable<BookCopy>> ReadAvailableCopiesAsync(Guid bookId)
         {
-            var book = await _bookRepository.GetByIdAsync(bookId);
+            var book = await _bookRepository.ReadByIdAsync(bookId);
             return book?.Copies?.Where(c => c.IsAvailable) ?? Enumerable.Empty<BookCopy>();
         }
 
         // 6. Звіт по типах книг
         public async Task<Dictionary<BookType, int>> ReadReportByTypesAsync()
         {
-            var books = await _bookRepository.GetAllAsync();
+            var books = await _bookRepository.ReadAllAsync();
             return books
                 .GroupBy(b => b.AvailableTypes)
                 .ToDictionary(g => g.Key, g => g.Count());
