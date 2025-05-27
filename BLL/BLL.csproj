@@ -26,7 +26,6 @@
 
   <ItemGroup>
     <Folder Include="Facade\" />
-    <Folder Include="Strategy\" />
   </ItemGroup>
 
 </Project>
