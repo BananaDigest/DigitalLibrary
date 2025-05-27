@@ -20,12 +20,12 @@ namespace DAL.Repositories
             _dbSet = context.Set<TEntity>();
         }
 
-        public async Task<TEntity> GetByIdAsync(Guid id)
+        public async Task<TEntity> ReadByIdAsync(Guid id)
         {
             return await _dbSet.FindAsync(id);
         }
 
-        public async Task<IEnumerable<TEntity>> GetAllAsync()
+        public async Task<IEnumerable<TEntity>> ReadAllAsync()
         {
             return await _dbSet.ToListAsync();
         }
@@ -35,7 +35,7 @@ namespace DAL.Repositories
             return await _dbSet.Where(predicate).ToListAsync();
         }
 
-        public async Task AddAsync(TEntity entity)
+        public async Task CreateAsync(TEntity entity)
         {
             await _dbSet.AddAsync(entity);
         }
@@ -45,7 +45,7 @@ namespace DAL.Repositories
             _dbSet.Update(entity);
         }
 
-        public void Remove(TEntity entity)
+        public void Delete(TEntity entity)
         {
             _dbSet.Remove(entity);
         }

@@ -9,11 +9,11 @@ namespace DAL.Repositories
 {
     public interface IGenericRepository<TEntity> where TEntity : class
     {
-        Task<TEntity> GetByIdAsync(Guid id);
-        Task<IEnumerable<TEntity>> GetAllAsync();
+        Task<TEntity> ReadByIdAsync(Guid id);
+        Task<IEnumerable<TEntity>> ReadAllAsync();
         Task<IEnumerable<TEntity>> FindAsync(Expression<Func<TEntity, bool>> predicate);
-        Task AddAsync(TEntity entity);
+        Task CreateAsync(TEntity entity);
         void Update(TEntity entity);
-        void Remove(TEntity entity);
+        void Delete(TEntity entity);
     }
 }

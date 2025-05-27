@@ -21,12 +21,12 @@ namespace DAL.Repositories
             _dbSet = _context.Set<Book>();
         }
 
-        public async Task<IEnumerable<Book>> GetAllAsync()
+        public async Task<IEnumerable<Book>> ReadAllAsync()
         {
             return await _dbSet.Include(b => b.Copies).ToListAsync();
         }
 
-        public async Task<Book> GetByIdAsync(Guid id)
+        public async Task<Book> ReadByIdAsync(Guid id)
         {
             return await _dbSet.Include(b => b.Copies).FirstOrDefaultAsync(b => b.Id == id);
         }
@@ -36,7 +36,7 @@ namespace DAL.Repositories
             return await _dbSet.Where(predicate).Include(b => b.Copies).ToListAsync();
         }
 
-        public async Task AddAsync(Book book)
+        public async Task CreateAsync(Book book)
         {
             await _dbSet.AddAsync(book);
             await _context.SaveChangesAsync();

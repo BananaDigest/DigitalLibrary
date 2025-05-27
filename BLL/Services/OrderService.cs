@@ -22,20 +22,20 @@ namespace BLL.Services
             _mapper = mapper;
         }
 
-        public async Task<IEnumerable<OrderDto>> GetAllAsync()
+        public async Task<IEnumerable<OrderDto>> ReadAllAsync()
         {
-            var list = await _uow.Orders.GetAllAsync();
+            var list = await _uow.Orders.ReadAllAsync();
             return _mapper.Map<IEnumerable<OrderDto>>(list);
         }
 
-        public async Task<OrderDto> GetByIdAsync(Guid id)
+        public async Task<OrderDto> ReadByIdAsync(Guid id)
         {
-            var order = await _uow.Orders.GetByIdAsync(id)
+            var order = await _uow.Orders.ReadByIdAsync(id)
                 ?? throw new KeyNotFoundException($"Order {id} not found");
             return _mapper.Map<OrderDto>(order);
         }
 
-        public async Task<IEnumerable<OrderDto>> GetByUserAsync(Guid userId)
+        public async Task<IEnumerable<OrderDto>> ReadByUserAsync(Guid userId)
         {
             var list = await _uow.Orders.FindAsync(o => o.UserId == userId);
             return _mapper.Map<IEnumerable<OrderDto>>(list);
@@ -44,13 +44,13 @@ namespace BLL.Services
         public async Task CreateAsync(ActionOrderDto dto)
         {
             var entity = _mapper.Map<Order>(dto);
-            await _uow.Orders.AddAsync(entity);
+            await _uow.Orders.CreateAsync(entity);
             await _uow.CommitAsync();
         }
 
         public async Task UpdateAsync(ActionOrderDto dto)
         {
-            var existing = await _uow.Orders.GetByIdAsync(dto.Id)
+            var existing = await _uow.Orders.ReadByIdAsync(dto.Id)
                 ?? throw new KeyNotFoundException($"Order {dto.Id} not found");
             _mapper.Map(dto, existing);
             _uow.Orders.Update(existing);
@@ -59,9 +59,9 @@ namespace BLL.Services
 
         public async Task DeleteAsync(Guid id)
         {
-            var existing = await _uow.Orders.GetByIdAsync(id)
+            var existing = await _uow.Orders.ReadByIdAsync(id)
                 ?? throw new KeyNotFoundException($"Order {id} not found");
-            _uow.Orders.Remove(existing);
+            _uow.Orders.Delete(existing);
             await _uow.CommitAsync();
         }
     }

@@ -22,13 +22,13 @@ namespace BLL.Services
             _mapper = mapper;
         }
 
-        public async Task<IEnumerable<BookDto>> GetAllAsync()
+        public async Task<IEnumerable<BookDto>> ReadAllAsync()
         {
             var entities = await _uow.Books.GetAllAsync();
             return _mapper.Map<IEnumerable<BookDto>>(entities);
         }
 
-        public async Task<BookDto> GetByIdAsync(Guid id)
+        public async Task<BookDto> ReadByIdAsync(Guid id)
         {
             var book = await _uow.Books.GetByIdAsync(id)
                 ?? throw new KeyNotFoundException($"Book {id} not found");

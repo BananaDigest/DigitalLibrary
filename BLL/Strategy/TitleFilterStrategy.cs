@@ -14,7 +14,7 @@ namespace BLL.Strategy
         public TitleFilterStrategy(IBookRepository repository) => _repository = repository;
         public async Task<IEnumerable<Book>> FilterAsync(string criterion)
         {
-            var all = await _repository.GetAllAsync();
+            var all = await _repository.ReadAllAsync();
             return all.Where(b => b.Title.Contains(criterion, StringComparison.OrdinalIgnoreCase));
         }
     }

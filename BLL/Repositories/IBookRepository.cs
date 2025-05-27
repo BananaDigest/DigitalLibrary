@@ -10,10 +10,10 @@ namespace BLL.Repositories
 {
     public interface IBookRepository
     {
-        Task<IEnumerable<Book>> GetAllAsync();
-        Task<Book> GetByIdAsync(Guid id);
+        Task<IEnumerable<Book>> ReadAllAsync();
+        Task<Book> ReadByIdAsync(Guid id);
         Task<IEnumerable<Book>> FindAsync(Expression<Func<Book, bool>> predicate);
-        Task AddAsync(Book book);
+        Task CreateAsync(Book book);
         Task UpdateAsync(Book book);
         Task DeleteAsync(Guid id);
         Task<bool> ExistsAsync(Guid id);

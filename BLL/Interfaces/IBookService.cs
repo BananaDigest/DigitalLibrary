@@ -7,8 +7,8 @@ namespace BLL.Interfaces
 {
     public interface IBookService
     {
-        Task<IEnumerable<BookDto>> GetAllAsync();
-        Task<BookDto> GetByIdAsync(Guid id);
+        Task<IEnumerable<BookDto>> ReadAllAsync();
+        Task<BookDto> ReadByIdAsync(Guid id);
         Task<IEnumerable<BookDto>> SearchAsync(string term);
         Task<IEnumerable<BookDto>> FilterByTypeAsync(BookType type);
         Task<IEnumerable<BookDto>> FilterByGenreAsync(Guid genreId);
