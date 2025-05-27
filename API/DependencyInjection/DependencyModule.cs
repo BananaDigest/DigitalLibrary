@@ -10,25 +10,28 @@ using Autofac;
 
 namespace API.DependencyInjection
 {
-    protected override void Load(ContainerBuilder builder)
+    public class DependencyModule : Autofac.Module
     {
-        // --- Репозиторії ---
-        builder.RegisterType<BookRepository>()
-               .As<IBookRepository>()
-               .InstancePerLifetimeScope();
+        protected override void Load(ContainerBuilder builder)
+        {
+            // --- Репозиторії ---
+            builder.RegisterType<BookRepository>()
+                   .As<IBookRepository>()
+                   .InstancePerLifetimeScope();
 
-        builder.RegisterType<OrderRepository>()
-               .As<IOrderRepository>()
-               .InstancePerLifetimeScope();
+            builder.RegisterType<OrderRepository>()
+                   .As<IOrderRepository>()
+                   .InstancePerLifetimeScope();
 
-        // --- Сервіси ---
-        // Методи у сервісах мають назви Create, Read, Delete
-        builder.RegisterType<BookService>()
-               .As<IBookService>()
-               .InstancePerLifetimeScope();
+            // --- Сервіси ---
+            // Методи у сервісах мають назви Create, Read, Delete
+            builder.RegisterType<BookService>()
+                   .As<IBookService>()
+                   .InstancePerLifetimeScope();
 
-        builder.RegisterType<OrderService>()
-               .As<IOrderService>()
-               .InstancePerLifetimeScope();
+            builder.RegisterType<OrderService>()
+                   .As<IOrderService>()
+                   .InstancePerLifetimeScope();
+        }
     }
 }
