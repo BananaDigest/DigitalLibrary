@@ -1,51 +1,57 @@
 ﻿using AutoMapper;
 using BLL.DTOs;
-using BLL.Facade;
 using BLL.Interfaces;
-using Domain.Entities;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace API.Controllers
 {
     [ApiController]
-    [Route("api/[controller]")]
+    [Route("api/books")]
     public class BooksController : ControllerBase
     {
-        private readonly LibraryFacade _facade;
-        public BooksController(LibraryFacade facade) => _facade = facade;
+        private readonly IBookService _svc;
 
-        // POST api/book
-        [HttpPost]
-        public async Task<ActionResult<Guid>> CreateBook([FromBody] ActionBookDto dto)
+        public BooksController(IBookService svc)
         {
-            var id = await _facade.CreateBookAsync(dto);
-            return CreatedAtAction(nameof(ReadBook), new { id }, id);
+            _svc = svc;
         }
 
-        // GET api/book
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<ActionBookDto>>> ReadBooks([FromQuery] string filterBy, [FromQuery] string term)
+        public async Task<IActionResult> GetAll()
+            => Ok(await _svc.ReadAllAsync());
+
+        [HttpGet("{id:guid}")]
+        public async Task<IActionResult> GetById(Guid id)
+            => Ok(await _svc.ReadByIdAsync(id));
+
+        [HttpGet("search")]
+        public async Task<IActionResult> Search([FromQuery] string term)
+            => Ok(await _svc.SearchAsync(term));
+
+        [HttpPost]
+        [Authorize(Roles = "Manager,Admin")]
+        public async Task<IActionResult> Create([FromBody] ActionBookDto dto)
         {
-            var dtos = await _facade.FindBooksAsync(term, filterBy);
-            return Ok(dtos);
+            await _svc.CreateAsync(dto);
+            return CreatedAtAction(nameof(GetById), new { id = dto.Id }, null);
         }
 
-        // GET api/book/{id}
-        [HttpGet("{id}")]
-        public async Task<ActionResult<IEnumerable<BookCopy>>> ReadBook(Guid id)
+        [HttpPut("{id:guid}")]
+        [Authorize(Roles = "Manager,Admin")]
+        public async Task<IActionResult> Update(Guid id, [FromBody] ActionBookDto dto)
         {
-            var copies = await _facade.ReadAvailableCopiesAsync(id);
-            return Ok(copies);
+            dto.Id = id;
+            await _svc.UpdateAsync(dto);
+            return NoContent();
         }
 
-        // DELETE api/book/{id}
-        [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteBook(Guid id)
+        [HttpDelete("{id:guid}")]
+        [Authorize(Roles = "Manager,Admin")]
+        public async Task<IActionResult> Delete(Guid id)
         {
-            await _facade.DeleteBookAsync(id);
+            await _svc.DeleteAsync(id);
             return NoContent();
         }
     }
-
 }

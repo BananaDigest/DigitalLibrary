@@ -1,5 +1,4 @@
 ﻿using BLL.DTOs;
-using BLL.Facade;
 using BLL.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -7,25 +6,45 @@ using Microsoft.AspNetCore.Mvc;
 namespace API.Controllers
 {
     [ApiController]
-    [Route("api/[controller]")]
+    [Route("api/orders")]
+    [Authorize]
     public class OrdersController : ControllerBase
     {
-        private readonly LibraryFacade _facade;
-        public OrdersController(LibraryFacade facade) => _facade = facade;
+        private readonly IOrderService _svc;
 
-        // POST api/order
+        public OrdersController(IOrderService svc) => _svc = svc;
+
+        [HttpGet]
+        public async Task<IActionResult> GetAll()
+            => Ok(await _svc.ReadAllAsync());
+
+        [HttpGet("{id:guid}")]
+        public async Task<IActionResult> GetById(Guid id)
+            => Ok(await _svc.ReadByIdAsync(id));
+
+        [HttpGet("by-user/{userId:guid}")]
+        public async Task<IActionResult> GetByUser(Guid userId)
+            => Ok(await _svc.ReadByUserAsync(userId));
+
         [HttpPost]
-        public async Task<IActionResult> CreateOrder([FromBody] ActionOrderDto dto)
+        public async Task<IActionResult> Create([FromBody] ActionOrderDto dto)
         {
-            await _facade.CreateOrderAsync(dto);
-            return Created(string.Empty, null);
+            await _svc.CreateAsync(dto);
+            return CreatedAtAction(nameof(GetById), new { id = dto.Id }, null);
         }
 
-        // DELETE api/order/{id}
-        [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteOrder(Guid id)
+        [HttpPut("{id:guid}")]
+        public async Task<IActionResult> Update(Guid id, [FromBody] ActionOrderDto dto)
         {
-            await _facade.DeleteOrderAsync(id);
+            dto.Id = id;
+            await _svc.UpdateAsync(dto);
+            return NoContent();
+        }
+
+        [HttpDelete("{id:guid}")]
+        public async Task<IActionResult> Delete(Guid id)
+        {
+            await _svc.DeleteAsync(id);
             return NoContent();
         }
     }

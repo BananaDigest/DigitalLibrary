@@ -24,13 +24,13 @@ namespace BLL.Services
 
         public async Task<IEnumerable<BookDto>> ReadAllAsync()
         {
-            var entities = await _uow.Books.GetAllAsync();
+            var entities = await _uow.Books.ReadAllAsync();
             return _mapper.Map<IEnumerable<BookDto>>(entities);
         }
 
         public async Task<BookDto> ReadByIdAsync(Guid id)
         {
-            var book = await _uow.Books.GetByIdAsync(id)
+            var book = await _uow.Books.ReadByIdAsync(id)
                 ?? throw new KeyNotFoundException($"Book {id} not found");
             return _mapper.Map<BookDto>(book);
         }
@@ -59,13 +59,13 @@ namespace BLL.Services
         public async Task CreateAsync(ActionBookDto dto)
         {
             var entity = _mapper.Map<Book>(dto);
-            await _uow.Books.AddAsync(entity);
+            await _uow.Books.CreateAsync(entity);
             await _uow.CommitAsync();
         }
 
         public async Task UpdateAsync(ActionBookDto dto)
         {
-            var existing = await _uow.Books.GetByIdAsync(dto.Id)
+            var existing = await _uow.Books.ReadByIdAsync(dto.Id)
                 ?? throw new KeyNotFoundException($"Book {dto.Id} not found");
             _mapper.Map(dto, existing);
             _uow.Books.Update(existing);
@@ -74,9 +74,9 @@ namespace BLL.Services
 
         public async Task DeleteAsync(Guid id)
         {
-            var existing = await _uow.Books.GetByIdAsync(id)
+            var existing = await _uow.Books.ReadByIdAsync(id)
                 ?? throw new KeyNotFoundException($"Book {id} not found");
-            _uow.Books.Remove(existing);
+            _uow.Books.Delete(existing);
             await _uow.CommitAsync();
         }
     }

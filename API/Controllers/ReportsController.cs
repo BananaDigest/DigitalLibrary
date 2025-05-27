@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
+
 namespace API.Controllers
 {
     [ApiController]
@@ -25,7 +26,7 @@ namespace API.Controllers
         public async Task<IActionResult> GetPaperAvailability()
         {
             //  в BookDto нема полів: AvailableCopies, InitialCopies
-            var books = await _bookSvc.GetAllAsync();
+            var books = await _bookSvc.ReadAllAsync();
             var report = books.Select(b => new
             {
                 b.Id,
@@ -42,7 +43,7 @@ namespace API.Controllers
         [HttpGet("paper-orders")]
         public async Task<IActionResult> GetPaperOrdersReport()
         {
-            var orders = await _orderSvc.GetAllAsync();
+            var orders = await _orderSvc.ReadAllAsync();
             // Фільтруємо тільки замовлення паперових копій
             var paperOrders = orders
                 .Where(o => o.OrderType == Domain.Enums.BookType.Paper)
@@ -61,7 +62,7 @@ namespace API.Controllers
         [HttpGet("digital-metrics")]
         public async Task<IActionResult> GetDigitalMetrics()
         {
-            var books = await _bookSvc.GetAllAsync();
+            var books = await _bookSvc.ReadAllAsync();
             var metrics = books.Select(b => new
             {
                 b.Id,

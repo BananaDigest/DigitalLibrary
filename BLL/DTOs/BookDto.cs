@@ -1,9 +1,4 @@
 ﻿using Domain.Enums;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace BLL.DTOs
 {
@@ -17,5 +12,11 @@ namespace BLL.DTOs
         public BookType AvailableTypes { get; set; }
         public Guid GenreId { get; set; }
         public GenreDto Genre { get; set; }
+
+        // Додайте ці нові властивості
+        public int AvailableCopies { get; set; }  // Доступні паперові копії
+        public int InitialCopies { get; set; }    // Початкова кількість паперових копій
+        public int DownloadCount { get; set; }    // Кількість завантажень (електронна версія)
+        public int ListenCount { get; set; }      // Кількість прослуховувань (аудіо версія)
     }
 }

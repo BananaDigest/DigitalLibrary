@@ -24,13 +24,13 @@ namespace BLL.Services
 
         public async Task<IEnumerable<GenreDto>> ReadAllAsync()
         {
-            var entities = await _uow.Genres.GetAllAsync();
+            var entities = await _uow.Genres.ReadAllAsync();
             return _mapper.Map<IEnumerable<GenreDto>>(entities);
         }
 
         public async Task<GenreDto> ReadByIdAsync(Guid id)
         {
-            var genre = await _uow.Genres.GetByIdAsync(id)
+            var genre = await _uow.Genres.ReadByIdAsync(id)
                 ?? throw new KeyNotFoundException($"Genre {id} not found");
             return _mapper.Map<GenreDto>(genre);
         }
@@ -38,13 +38,13 @@ namespace BLL.Services
         public async Task CreateAsync(GenreDto dto)
         {
             var entity = _mapper.Map<Genre>(dto);
-            await _uow.Genres.AddAsync(entity);
+            await _uow.Genres.CreateAsync(entity);
             await _uow.CommitAsync();
         }
 
         public async Task UpdateAsync(GenreDto dto)
         {
-            var existing = await _uow.Genres.GetByIdAsync(dto.Id)
+            var existing = await _uow.Genres.ReadByIdAsync(dto.Id)
                 ?? throw new KeyNotFoundException($"Genre {dto.Id} not found");
             _mapper.Map(dto, existing);
             _uow.Genres.Update(existing);
@@ -53,9 +53,9 @@ namespace BLL.Services
 
         public async Task DeleteAsync(Guid id)
         {
-            var existing = await _uow.Genres.GetByIdAsync(id)
+            var existing = await _uow.Genres.ReadByIdAsync(id)
                 ?? throw new KeyNotFoundException($"Genre {id} not found");
-            _uow.Genres.Remove(existing);
+            _uow.Genres.Delete(existing);
             await _uow.CommitAsync();
         }
     }
