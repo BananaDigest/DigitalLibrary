@@ -24,4 +24,9 @@
     <ProjectReference Include="..\Domain\Domain.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Facade\" />
+    <Folder Include="Strategy\" />
+  </ItemGroup>
+
 </Project>
