@@ -1,6 +1,57 @@
-﻿namespace API.Controllers
+﻿using AutoMapper;
+using BLL.DTOs;
+using BLL.Interfaces;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+
+namespace API.Controllers
 {
-    public class BooksController
+    [ApiController]
+    [Route("api/books")]
+    public class BooksController : ControllerBase
     {
+        private readonly IBookService _svc;
+
+        public BooksController(IBookService svc)
+        {
+            _svc = svc;
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> GetAll()
+            => Ok(await _svc.GetAllAsync());
+
+        [HttpGet("{id:guid}")]
+        public async Task<IActionResult> GetById(Guid id)
+            => Ok(await _svc.GetByIdAsync(id));
+
+        [HttpGet("search")]
+        public async Task<IActionResult> Search([FromQuery] string term)
+            => Ok(await _svc.SearchAsync(term));
+
+        [HttpPost]
+        [Authorize(Roles = "Manager,Admin")]
+        public async Task<IActionResult> Create([FromBody] CreateBookDto dto)
+        {
+            await _svc.CreateAsync(dto);
+            return CreatedAtAction(nameof(GetById), new { id = dto.Id }, null);
+        }
+
+        [HttpPut("{id:guid}")]
+        [Authorize(Roles = "Manager,Admin")]
+        public async Task<IActionResult> Update(Guid id, [FromBody] UpdateBookDto dto)
+        {
+            dto.Id = id;
+            await _svc.UpdateAsync(dto);
+            return NoContent();
+        }
+
+        [HttpDelete("{id:guid}")]
+        [Authorize(Roles = "Manager,Admin")]
+        public async Task<IActionResult> Delete(Guid id)
+        {
+            await _svc.DeleteAsync(id);
+            return NoContent();
+        }
     }
 }
