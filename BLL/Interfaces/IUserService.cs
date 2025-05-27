@@ -9,7 +9,7 @@ namespace BLL.Interfaces
 {
     public interface IUserService
     {
-        Task RegisterAsync(UserRegistrationDto dto);
+        Task RegisterAsync(UserDto dto);
         Task<UserDto> GetByIdAsync(Guid id);
         Task DeleteAsync(Guid id);
     }

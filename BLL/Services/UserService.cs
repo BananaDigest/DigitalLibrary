@@ -22,7 +22,7 @@ namespace BLL.Services
             _mapper = mapper;
         }
 
-        public async Task RegisterAsync(UserRegistrationDto dto)
+        public async Task RegisterAsync(UserDto dto)
         {
             var user = _mapper.Map<User>(dto);
             await _uow.Users.AddAsync(user);

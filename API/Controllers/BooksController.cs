@@ -31,7 +31,7 @@ namespace API.Controllers
 
         [HttpPost]
         [Authorize(Roles = "Manager,Admin")]
-        public async Task<IActionResult> Create([FromBody] CreateBookDto dto)
+        public async Task<IActionResult> Create([FromBody] ActionBookDto dto)
         {
             await _svc.CreateAsync(dto);
             return CreatedAtAction(nameof(GetById), new { id = dto.Id }, null);
@@ -39,7 +39,7 @@ namespace API.Controllers
 
         [HttpPut("{id:guid}")]
         [Authorize(Roles = "Manager,Admin")]
-        public async Task<IActionResult> Update(Guid id, [FromBody] UpdateBookDto dto)
+        public async Task<IActionResult> Update(Guid id, [FromBody] ActionBookDto dto)
         {
             dto.Id = id;
             await _svc.UpdateAsync(dto);

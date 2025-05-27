@@ -27,14 +27,14 @@ namespace API.Controllers
             => Ok(await _svc.GetByUserAsync(userId));
 
         [HttpPost]
-        public async Task<IActionResult> Create([FromBody] CreateOrderDto dto)
+        public async Task<IActionResult> Create([FromBody] ActionOrderDto dto)
         {
             await _svc.CreateAsync(dto);
             return CreatedAtAction(nameof(GetById), new { id = dto.Id }, null);
         }
 
         [HttpPut("{id:guid}")]
-        public async Task<IActionResult> Update(Guid id, [FromBody] UpdateOrderDto dto)
+        public async Task<IActionResult> Update(Guid id, [FromBody] ActionOrderDto dto)
         {
             dto.Id = id;
             await _svc.UpdateAsync(dto);

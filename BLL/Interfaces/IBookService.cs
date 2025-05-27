@@ -12,8 +12,8 @@ namespace BLL.Interfaces
         Task<IEnumerable<BookDto>> SearchAsync(string term);
         Task<IEnumerable<BookDto>> FilterByTypeAsync(BookType type);
         Task<IEnumerable<BookDto>> FilterByGenreAsync(Guid genreId);
-        Task CreateAsync(CreateBookDto dto);
-        Task UpdateAsync(UpdateBookDto dto);
+        Task CreateAsync(ActionBookDto dto);
         Task DeleteAsync(Guid id);
+        Task UpdateAsync(ActionBookDto dto);
     }
 }

@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace BLL.DTOs
 {
-    public class UpdateBookDto
+    public class ActionBookDto
     {
         public string Title { get; set; }
         public string Author { get; set; }

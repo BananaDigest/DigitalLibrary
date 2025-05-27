@@ -41,14 +41,14 @@ namespace BLL.Services
             return _mapper.Map<IEnumerable<OrderDto>>(list);
         }
 
-        public async Task CreateAsync(CreateOrderDto dto)
+        public async Task CreateAsync(ActionOrderDto dto)
         {
             var entity = _mapper.Map<Order>(dto);
             await _uow.Orders.AddAsync(entity);
             await _uow.CommitAsync();
         }
 
-        public async Task UpdateAsync(UpdateOrderDto dto)
+        public async Task UpdateAsync(ActionOrderDto dto)
         {
             var existing = await _uow.Orders.GetByIdAsync(dto.Id)
                 ?? throw new KeyNotFoundException($"Order {dto.Id} not found");

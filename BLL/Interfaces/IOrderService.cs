@@ -14,8 +14,8 @@ namespace BLL.Interfaces
         Task<IEnumerable<OrderDto>> GetAllAsync();
         Task<OrderDto> GetByIdAsync(Guid id);
         Task<IEnumerable<OrderDto>> GetByUserAsync(Guid userId);
-        Task CreateAsync(CreateOrderDto dto);
-        Task UpdateAsync(UpdateOrderDto dto);
+        Task CreateAsync(ActionOrderDto dto);
+        Task UpdateAsync(ActionOrderDto dto);
         Task DeleteAsync(Guid id);
     }
 }

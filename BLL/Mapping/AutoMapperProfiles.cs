@@ -11,13 +11,13 @@ namespace BLL.Mapping
             // Domain -> DTO
             CreateMap<Book, BookDto>();
             CreateMap<Genre, GenreDto>();
-            CreateMap<User, UserRegistrationDto>();
+            CreateMap<User, UserDto>();
             CreateMap<Order, OrderDto>();
             CreateMap<BookCopy, BookCopyDto>();
 
             // DTO -> Domain
-            CreateMap<CreateBookDto, Book>();
-            CreateMap<UserRegistrationDto, User>();
+            CreateMap<ActionBookDto, Book>();
+            CreateMap<UserDto, User>();
 
             // При необхідності додати кастомні налаштування:
             // .ForMember(dest => dest.Property, opt => opt.MapFrom(src => src.OtherProperty));
