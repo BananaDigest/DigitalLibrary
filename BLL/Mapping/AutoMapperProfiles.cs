@@ -11,9 +11,14 @@ namespace BLL.Mapping
             // Domain -> DTO
             CreateMap<Book, BookDto>();
             CreateMap<Genre, GenreDto>();
-            CreateMap<User, UserDto>();
+            CreateMap<User, UserDto>()
+            .ForMember(dest => dest.Email,
+               opt => opt.MapFrom(src => src.Email))
+            .ForMember(dest => dest.Password,
+               opt => opt.MapFrom(src => src.Password));
             CreateMap<Order, OrderDto>();
             CreateMap<BookCopy, BookCopyDto>();
+
 
             // DTO -> Domain
             CreateMap<ActionBookDto, Book>();

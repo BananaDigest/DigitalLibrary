@@ -43,5 +43,19 @@ namespace BLL.Services
             _uow.Users.Delete(existing);
             await _uow.CommitAsync();
         }
+        public async Task<UserDto> AuthenticateAsync(string email, string password)
+        {
+            // 1) Знаходимо по email
+            var allUsers = await _uow.Users.ReadAllAsync();
+            var user = allUsers.FirstOrDefault(u =>
+                u.Email.Equals(email, StringComparison.OrdinalIgnoreCase))
+                ?? throw new UnauthorizedAccessException("Невірний email або пароль");
+
+            // 2) Простий Plain-text порівняння (для демонстрації)
+            if (user.Password != password)
+                throw new UnauthorizedAccessException("Невірний email або пароль");
+
+            return _mapper.Map<UserDto>(user);
+        }
     }
 }

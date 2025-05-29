@@ -1,118 +1,132 @@
 ﻿using System;
-using System.Linq;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using BLL.DTOs;
-using BLL.Factory;
 using BLL.Interfaces;
 using Domain.Enums;
 
 namespace BLL.Facade
 {
+    /// <summary>
+    /// Фасад, який інкапсулює взаємодію з різними сервісами BLL
+    /// та спрощує клієнтський код (ConsoleApp, Web API тощо).
+    /// </summary>
     public class LibraryFacade
     {
         private readonly IBookService _bookService;
-        private readonly IOrderService _orderService;
         private readonly IGenreService _genreService;
+        private readonly IOrderService _orderService;
         private readonly IUserService _userService;
 
         public LibraryFacade(
             IBookService bookService,
-            IOrderService orderService,
             IGenreService genreService,
+            IOrderService orderService,
             IUserService userService)
         {
             _bookService = bookService;
-            _orderService = orderService;
             _genreService = genreService;
+            _orderService = orderService;
             _userService = userService;
         }
 
-        // 1. Додати книгу через фабрику та сервіс
-        public async Task<Guid> CreateBookAsync(ActionBookDto dto)
+        // Книги
+        /// <summary>Повернути всі книги.</summary>
+        public Task<IEnumerable<BookDto>> GetAllBooksAsync() =>
+            _bookService.ReadAllAsync();
+
+        /// <summary>Повернути книгу за ідентифікатором.</summary>
+        public Task<BookDto> GetBookByIdAsync(Guid id) =>
+            _bookService.ReadByIdAsync(id);
+
+        /// <summary>Пошук книг за терміном.</summary>
+        public Task<IEnumerable<BookDto>> SearchBooksAsync(string term) =>
+            _bookService.SearchAsync(term);
+
+        /// <summary>Фільтрація книг за типом.</summary>
+        public Task<IEnumerable<BookDto>> FilterBooksByTypeAsync(BookType type) =>
+            _bookService.FilterByTypeAsync(type);
+
+        /// <summary>Фільтрація книг за жанром.</summary>
+        public Task<IEnumerable<BookDto>> FilterBooksByGenreAsync(Guid genreId) =>
+            _bookService.FilterByGenreAsync(genreId);
+
+        /// <summary>Створити нову книгу.</summary>
+        public Task CreateBookAsync(ActionBookDto dto) =>
+            _bookService.CreateAsync(dto);
+
+        /// <summary>Оновити існуючу книгу.</summary>
+        public Task UpdateBookAsync(ActionBookDto dto) =>
+            _bookService.UpdateAsync(dto);
+
+        /// <summary>Видалити книгу.</summary>
+        public Task DeleteBookAsync(Guid id) =>
+            _bookService.DeleteAsync(id);
+
+        // Жанри
+        /// <summary>Повернути всі жанри.</summary>
+        public Task<IEnumerable<GenreDto>> GetAllGenresAsync() =>
+            _genreService.ReadAllAsync();
+
+        /// <summary>Повернути жанр за ідентифікатором.</summary>
+        public Task<GenreDto> GetGenreByIdAsync(Guid id) =>
+            _genreService.ReadByIdAsync(id);
+
+        /// <summary>Створити новий жанр.</summary>
+        public Task CreateGenreAsync(GenreDto dto) =>
+            _genreService.CreateAsync(dto);
+
+        /// <summary>Оновити жанр.</summary>
+        public Task UpdateGenreAsync(GenreDto dto) =>
+            _genreService.UpdateAsync(dto);
+
+        /// <summary>Видалити жанр.</summary>
+        public Task DeleteGenreAsync(Guid id) =>
+            _genreService.DeleteAsync(id);
+
+        // Замовлення
+        /// <summary>Повернути всі замовлення.</summary>
+        public Task<IEnumerable<OrderDto>> GetAllOrdersAsync() =>
+            _orderService.ReadAllAsync();
+
+        /// <summary>Повернути замовлення за ідентифікатором.</summary>
+        public Task<OrderDto> GetOrderByIdAsync(Guid id) =>
+            _orderService.ReadByIdAsync(id);
+
+        /// <summary>Повернути замовлення користувача.</summary>
+        public Task<IEnumerable<OrderDto>> GetOrdersByUserAsync(Guid userId) =>
+            _orderService.ReadByUserAsync(userId);
+
+        /// <summary>Створити нове замовлення.</summary>
+        public Task CreateOrderAsync(ActionOrderDto dto) =>
+            _orderService.CreateAsync(dto);
+
+        /// <summary>Оновити замовлення.</summary>
+        public Task UpdateOrderAsync(ActionOrderDto dto) =>
+            _orderService.UpdateAsync(dto);
+
+        /// <summary>Видалити замовлення.</summary>
+        public Task DeleteOrderAsync(Guid id) =>
+            _orderService.DeleteAsync(id);
+
+        // Користувачі
+        /// <summary>Зареєструвати користувача.</summary>
+        public async Task<UserDto> RegisterUserAsync(UserDto dto)
         {
-            // Фабрика створює доменну модель для отримання Id
-            BookFactory factory = dto.AvailableTypes.HasFlag(BookType.Paper)
-                ? (BookFactory)new PaperBookFactory()
-                : dto.AvailableTypes.HasFlag(BookType.Audio)
-                    ? new AudioBookFactory()
-                    : new ElectronicBookFactory();
-
-            var domainBook = factory.Create(dto);
-
-            // Виклик сервісу для збереження через BLL
-            await _bookService.CreateAsync(dto);
-
-            // Повертаємо Id з доменної моделі
-            return domainBook.Id;
+            await _userService.RegisterAsync(dto);
+            return dto;
         }
 
-        // 2. Пошук книг за автором або назвою через сервіс
-        public async Task<IEnumerable<ActionBookDto>> FindBooksAsync(string value, string filterBy)
-        {
-            var all = await _bookService.ReadAllAsync();
-            IEnumerable<BookDto> filtered = filterBy.ToLower() switch
-            {
-                "author" => all.Where(b => b.Author.Contains(value, StringComparison.OrdinalIgnoreCase)),
-                _ => all.Where(b => b.Title.Contains(value, StringComparison.OrdinalIgnoreCase)),
-            };
+        /// <summary>Отримати користувача за ідентифікатором.</summary>
+        public Task<UserDto> GetUserByIdAsync(Guid id) =>
+            _userService.ReadByIdAsync(id);
 
-            return filtered.Select(b => new ActionBookDto
-            {
-                Id = b.Id,
-                Title = b.Title,
-                Author = b.Author,
-                Publisher = b.Publisher,
-                PublicationYear = b.PublicationYear,
-                AvailableTypes = b.AvailableTypes,
-                GenreId = b.GenreId
-            });
-        }
+        /// <summary>Аутентифікувати користувача.</summary>
+        public Task<UserDto> AuthenticateAsync(string email, string password) =>
+            _userService.AuthenticateAsync(email, password);
 
-        public async Task DeleteBookAsync(Guid bookId)
-        {
-            await _bookService.DeleteAsync(bookId);
-        }
-
-        // 3. Створення замовлення через сервіс
-        public async Task CreateOrderAsync(ActionOrderDto dto)
-        {
-            await _orderService.CreateAsync(dto);
-        }
-
-        // 4. Видалення замовлення через сервіс
-        public async Task DeleteOrderAsync(Guid id)
-        {
-            await _orderService.DeleteAsync(id);
-        }
-
-        // 5. Отримати доступні копії книги через сервіс
-        public async Task<int> ReadAvailableCopiesAsync(Guid bookId)
-        {
-            // Оскільки в BookDto є лише AvailableCopies (int)
-            var bookDto = await _bookService.ReadByIdAsync(bookId);
-            return bookDto.AvailableCopies;
-        }
-
-        // 6. Звіт по типах книг через сервіс
-        public async Task<Dictionary<BookType, int>> ReadReportByTypesAsync()
-        {
-            var all = await _bookService.ReadAllAsync();
-            return all
-                .GroupBy(b => b.AvailableTypes)
-                .ToDictionary(g => g.Key, g => g.Count());
-        }
-
-        // 7. Приклад роботи з жанрами через IGenreService
-        public async Task<IEnumerable<GenreDto>> GetAllGenresAsync()
-        {
-            return await _genreService.ReadAllAsync();
-        }
-
-        // 8. Приклад роботи з користувачами через IUserService
-        public async Task<UserDto> GetUserByIdAsync(Guid userId)
-        {
-            return await _userService.ReadByIdAsync(userId);
-        }
+        /// <summary>Видалити користувача.</summary>
+        public Task DeleteUserAsync(Guid id) =>
+            _userService.DeleteAsync(id);
     }
 }

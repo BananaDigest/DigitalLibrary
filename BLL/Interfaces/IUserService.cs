@@ -11,6 +11,7 @@ namespace BLL.Interfaces
     {
         Task RegisterAsync(UserDto dto);
         Task<UserDto> ReadByIdAsync(Guid id);
+        Task<UserDto> AuthenticateAsync(string email, string password);
         Task DeleteAsync(Guid id);
     }
 }
