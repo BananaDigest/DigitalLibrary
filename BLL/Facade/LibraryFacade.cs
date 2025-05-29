@@ -1,55 +1,63 @@
-﻿using BLL.DTOs;
+﻿using System;
+using System.Linq;
+using System.Collections.Generic;
+using System.Threading.Tasks;
+using BLL.DTOs;
 using BLL.Factory;
 using BLL.Interfaces;
-using BLL.Repositories;
-using BLL.Strategy;
-using Domain.Entities;
 using Domain.Enums;
-using BLL.Services;
 
 namespace BLL.Facade
 {
     public class LibraryFacade
     {
-        private IBookService _bookService;
-        private IOrderService _orderService;
-        private IBookRepository _bookRepository;
+        private readonly IBookService _bookService;
+        private readonly IOrderService _orderService;
+        private readonly IGenreService _genreService;
+        private readonly IUserService _userService;
 
         public LibraryFacade(
             IBookService bookService,
             IOrderService orderService,
-            IBookRepository bookRepository)
+            IGenreService genreService,
+            IUserService userService)
         {
             _bookService = bookService;
             _orderService = orderService;
-            _bookRepository = bookRepository;
+            _genreService = genreService;
+            _userService = userService;
         }
 
-        // 1. Додати книгу через фабрику
+        // 1. Додати книгу через фабрику та сервіс
         public async Task<Guid> CreateBookAsync(ActionBookDto dto)
         {
+            // Фабрика створює доменну модель для отримання Id
             BookFactory factory = dto.AvailableTypes.HasFlag(BookType.Paper)
                 ? (BookFactory)new PaperBookFactory()
                 : dto.AvailableTypes.HasFlag(BookType.Audio)
                     ? new AudioBookFactory()
                     : new ElectronicBookFactory();
 
-            var book = factory.Create(dto);
+            var domainBook = factory.Create(dto);
+
+            // Виклик сервісу для збереження через BLL
             await _bookService.CreateAsync(dto);
-            return book.Id;
+
+            // Повертаємо Id з доменної моделі
+            return domainBook.Id;
         }
 
-        // 2. Пошук книги за критерієм
+        // 2. Пошук книг за автором або назвою через сервіс
         public async Task<IEnumerable<ActionBookDto>> FindBooksAsync(string value, string filterBy)
         {
-            IBookFilterStrategy strategy = filterBy.ToLower() switch
+            var all = await _bookService.ReadAllAsync();
+            IEnumerable<BookDto> filtered = filterBy.ToLower() switch
             {
-                "author" => new AuthorFilterStrategy(_bookRepository),
-                _ => new TitleFilterStrategy(_bookRepository)
+                "author" => all.Where(b => b.Author.Contains(value, StringComparison.OrdinalIgnoreCase)),
+                _ => all.Where(b => b.Title.Contains(value, StringComparison.OrdinalIgnoreCase)),
             };
 
-            var books = await strategy.FilterAsync(value);
-            return books.Select(b => new ActionBookDto
+            return filtered.Select(b => new ActionBookDto
             {
                 Id = b.Id,
                 Title = b.Title,
@@ -63,36 +71,48 @@ namespace BLL.Facade
 
         public async Task DeleteBookAsync(Guid bookId)
         {
-            // тут ти можеш додати будь-яку додаткову логіку (авторизація, логування тощо)
             await _bookService.DeleteAsync(bookId);
         }
 
-        // 3. Створити замовлення
+        // 3. Створення замовлення через сервіс
         public async Task CreateOrderAsync(ActionOrderDto dto)
         {
             await _orderService.CreateAsync(dto);
         }
 
-        // 4. Видалити замовлення
+        // 4. Видалення замовлення через сервіс
         public async Task DeleteOrderAsync(Guid id)
         {
             await _orderService.DeleteAsync(id);
         }
 
-        // 5. Отримати доступні копії книги
-        public async Task<IEnumerable<BookCopy>> ReadAvailableCopiesAsync(Guid bookId)
+        // 5. Отримати доступні копії книги через сервіс
+        public async Task<int> ReadAvailableCopiesAsync(Guid bookId)
         {
-            var book = await _bookRepository.ReadByIdAsync(bookId);
-            return book?.Copies?.Where(c => c.IsAvailable) ?? Enumerable.Empty<BookCopy>();
+            // Оскільки в BookDto є лише AvailableCopies (int)
+            var bookDto = await _bookService.ReadByIdAsync(bookId);
+            return bookDto.AvailableCopies;
         }
 
-        // 6. Звіт по типах книг
+        // 6. Звіт по типах книг через сервіс
         public async Task<Dictionary<BookType, int>> ReadReportByTypesAsync()
         {
-            var books = await _bookRepository.ReadAllAsync();
-            return books
+            var all = await _bookService.ReadAllAsync();
+            return all
                 .GroupBy(b => b.AvailableTypes)
                 .ToDictionary(g => g.Key, g => g.Count());
+        }
+
+        // 7. Приклад роботи з жанрами через IGenreService
+        public async Task<IEnumerable<GenreDto>> GetAllGenresAsync()
+        {
+            return await _genreService.ReadAllAsync();
+        }
+
+        // 8. Приклад роботи з користувачами через IUserService
+        public async Task<UserDto> GetUserByIdAsync(Guid userId)
+        {
+            return await _userService.ReadByIdAsync(userId);
         }
     }
 }
