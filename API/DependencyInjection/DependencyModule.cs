@@ -1,36 +1,59 @@
 ﻿using API.Controllers;
 using BLL.Facade;
 using BLL.Interfaces;
-using BLL.Repositories;
 using BLL.Services;
 using DAL.Repositories;
 using DAL.Context;
 using System.Reflection;
 using Autofac;
+using DAL.UnitOfWork;
+using Microsoft.EntityFrameworkCore;
 
 namespace API.DependencyInjection
 {
     public class DependencyModule : Autofac.Module
     {
+        private readonly IConfiguration _configuration;
+
+        public DependencyModule(IConfiguration configuration)
+        {
+            _configuration = configuration;
+        }
+
         protected override void Load(ContainerBuilder builder)
         {
-            // --- Репозиторії ---
-            builder.RegisterType<BookRepository>()
-                   .As<IBookRepository>()
+            // DbContext Registration
+            builder.Register(c =>
+            {
+                var options = new DbContextOptionsBuilder<DigitalLibraryContext>()
+                    .UseSqlServer(_configuration.GetConnectionString("DefaultConnection"))
+                    .Options;
+                return new DigitalLibraryContext(options);
+            })
+            .AsSelf()
+            .InstancePerLifetimeScope();
+
+            // Unit of Work
+            builder.RegisterType<UnitOfWork>()
+                   .As<IUnitOfWork>()
                    .InstancePerLifetimeScope();
 
-            builder.RegisterType<OrderRepository>()
-                   .As<IOrderRepository>()
-                   .InstancePerLifetimeScope();
-
-            // --- Сервіси ---
-            // Методи у сервісах мають назви Create, Read, Delete
+            // BLL Services
             builder.RegisterType<BookService>()
                    .As<IBookService>()
                    .InstancePerLifetimeScope();
-
             builder.RegisterType<OrderService>()
                    .As<IOrderService>()
+                   .InstancePerLifetimeScope();
+            builder.RegisterType<GenreService>()
+                   .As<IGenreService>()
+                   .InstancePerLifetimeScope();
+            builder.RegisterType<UserService>()
+                   .As<IUserService>()
+                   .InstancePerLifetimeScope();
+
+            // Facade
+            builder.RegisterType<LibraryFacade>()
                    .InstancePerLifetimeScope();
         }
     }

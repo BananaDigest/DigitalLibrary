@@ -3,6 +3,7 @@ using BLL.DTOs;
 using BLL.Interfaces;
 using DAL.UnitOfWork;
 using Domain.Entities;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -26,7 +27,16 @@ namespace BLL.Services
         {
             var user = _mapper.Map<User>(dto);
             await _uow.Users.CreateAsync(user);
-            await _uow.CommitAsync();
+            //await _uow.CommitAsync();
+            try
+            {
+                await _uow.CommitAsync();
+            }
+            catch (DbUpdateException ex)
+            {
+                Console.WriteLine("Збереження не вдалося: " + ex.InnerException?.Message);
+                throw;  // пробросити далі або обробити за потреби
+            }
         }
 
         public async Task<UserDto> ReadByIdAsync(Guid id)

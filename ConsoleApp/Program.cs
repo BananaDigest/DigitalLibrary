@@ -12,6 +12,7 @@ using DAL.Context;
 using DAL.UnitOfWork;
 using Domain.Enums;
 using BLL.DTOs;
+using Microsoft.Extensions.Configuration;
 
 namespace ConsoleLibraryApp
 {
@@ -19,12 +20,17 @@ namespace ConsoleLibraryApp
     {
         static async Task Main(string[] args)
         {
-            // Налаштування DI
+            // Зчитуємо конфігурацію з appsettings.json
+            var config = new ConfigurationBuilder()
+                .SetBasePath(Directory.GetCurrentDirectory())
+                .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
+                .Build();
+
             var services = new ServiceCollection();
 
-            // DbContext та UnitOfWork
+            // DbContext та UnitOfWork з конфігурації
             services.AddDbContext<DigitalLibraryContext>(opt =>
-                opt.UseSqlServer("YourConnectionString"));
+                opt.UseSqlServer(config.GetConnectionString("DefaultConnection")));
             services.AddScoped<IUnitOfWork, UnitOfWork>();
 
             // AutoMapper
@@ -42,7 +48,14 @@ namespace ConsoleLibraryApp
             var provider = services.BuildServiceProvider();
             var facade = provider.GetRequiredService<LibraryFacade>();
 
-            await RunConsoleAsync(facade);
+            try
+            {
+                await RunConsoleAsync(facade);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Помилка: {ex.Message}");
+            }
         }
 
         static async Task RunConsoleAsync(LibraryFacade f)

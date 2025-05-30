@@ -9,17 +9,11 @@ namespace DAL.Context
     {
         public DigitalLibraryContext CreateDbContext(string[] args)
         {
-            // Шлях до конфігурації
-            var configuration = new ConfigurationBuilder()
-                .SetBasePath(Directory.GetCurrentDirectory())
-                .AddJsonFile("appsettings.json") // шукає в корені рішення
-                .Build();
+
+            var connectionString =
+                "Server=(localdb)\\MSSQLLocalDB;Database=DigitalLibraryDB;Trusted_Connection=True;";
 
             var optionsBuilder = new DbContextOptionsBuilder<DigitalLibraryContext>();
-
-            // Підключення з appsettings.json
-            var connectionString = configuration.GetConnectionString("DefaultConnection");
-
             optionsBuilder.UseSqlServer(connectionString);
 
             return new DigitalLibraryContext(optionsBuilder.Options);
