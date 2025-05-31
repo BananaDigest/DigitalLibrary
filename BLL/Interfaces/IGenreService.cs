@@ -11,9 +11,9 @@ namespace BLL.Interfaces
     public interface IGenreService
     {
         Task<IEnumerable<GenreDto>> ReadAllAsync();
-        Task<GenreDto> ReadByIdAsync(Guid id);
+        Task<GenreDto> ReadByIdAsync(int id);
         Task CreateAsync(GenreDto dto);
         Task UpdateAsync(GenreDto dto);
-        Task DeleteAsync(Guid id);
+        Task DeleteAsync(int id);
     }
 }

@@ -4,13 +4,13 @@ namespace BLL.DTOs
 {
     public class BookDto
     {
-        public Guid Id { get; set; }
+        public int Id { get; set; }
         public string Title { get; set; }
         public string Author { get; set; }
         public string Publisher { get; set; }
         public int PublicationYear { get; set; }
         public BookType AvailableTypes { get; set; }
-        public Guid GenreId { get; set; }
+        public int GenreId { get; set; }
         public GenreDto Genre { get; set; }
 
         // Додайте ці нові властивості

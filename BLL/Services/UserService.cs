@@ -39,14 +39,14 @@ namespace BLL.Services
             }
         }
 
-        public async Task<UserDto> ReadByIdAsync(Guid id)
+        public async Task<UserDto> ReadByIdAsync(int id)
         {
             var user = await _uow.Users.ReadByIdAsync(id)
                 ?? throw new KeyNotFoundException($"User {id} not found");
             return _mapper.Map<UserDto>(user);
         }
 
-        public async Task DeleteAsync(Guid id)
+        public async Task DeleteAsync(int id)
         {
             var existing = await _uow.Users.ReadByIdAsync(id)
                 ?? throw new KeyNotFoundException($"User {id} not found");

@@ -6,16 +6,16 @@ namespace Domain.Entities
 {
     public class Order
     {
-        public Guid Id { get; set; }
-        public Guid UserId { get; set; }
+        public int Id { get; set; }
+        public int UserId { get; set; }
         public User User { get; set; }
 
-        public Guid BookId { get; set; }
+        public int BookId { get; set; }
         public Book Book { get; set; }
 
-        public BookType OrderType { get; set; }
+        public BookTypeEntity OrderType { get; set; }
 
-        public Guid? BookCopyId { get; set; }
+        public int? BookCopyId { get; set; }
         public BookCopy BookCopy { get; set; }
 
         public DateTime OrderDate { get; set; }

@@ -12,10 +12,10 @@ namespace BLL.Interfaces
     public interface IOrderService
     {
         Task<IEnumerable<OrderDto>> ReadAllAsync();
-        Task<OrderDto> ReadByIdAsync(Guid id);
-        Task<IEnumerable<OrderDto>> ReadByUserAsync(Guid userId);
+        Task<OrderDto> ReadByIdAsync(int id);
+        Task<IEnumerable<OrderDto>> ReadByUserAsync(int userId);
         Task CreateAsync(ActionOrderDto dto);
         Task UpdateAsync(ActionOrderDto dto);
-        Task DeleteAsync(Guid id);
+        Task DeleteAsync(int id);
     }
 }

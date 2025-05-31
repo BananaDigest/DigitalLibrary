@@ -6,17 +6,16 @@ namespace Domain.Entities
 {
     public class Book
     {
-        public Guid Id { get; set; }
+        public int Id { get; set; }
         public string Title { get; set; }
         public string Author { get; set; }
         public string Publisher { get; set; }
         public int PublicationYear { get; set; }
 
-        public BookType AvailableTypes { get; set; }
-
-        public Guid GenreId { get; set; }
+        public int GenreId { get; set; }
         public Genre Genre { get; set; }
 
         public ICollection<BookCopy> Copies { get; set; } = new List<BookCopy>();
+        public ICollection<BookTypeEntity> AvailableTypes { get; set; } = new List<BookTypeEntity>();
     }
 }

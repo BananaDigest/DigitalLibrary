@@ -15,6 +15,7 @@ namespace DAL.UnitOfWork
         public IGenericRepository<Genre> Genres { get; }
         public IGenericRepository<User> Users { get; }
         public IGenericRepository<Order> Orders { get; }
+        public IGenericRepository<BookTypeEntity> BookTypes { get; }
 
         public UnitOfWork(DigitalLibraryContext context)
         {

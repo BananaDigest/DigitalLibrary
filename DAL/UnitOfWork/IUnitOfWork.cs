@@ -11,6 +11,7 @@ namespace DAL.UnitOfWork
         IGenericRepository<Genre> Genres { get; }
         IGenericRepository<User> Users { get; }
         IGenericRepository<Order> Orders { get; }
+        IGenericRepository<BookTypeEntity> BookTypes { get; }
 
         Task<int> CommitAsync();
     }

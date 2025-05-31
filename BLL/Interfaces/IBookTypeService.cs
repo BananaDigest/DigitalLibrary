@@ -3,12 +3,12 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using BLL.DTOs;
 
-namespace BLL.DTOs
+namespace BLL.Interfaces
 {
-    public class GenreDto
+    public interface IBookTypeService
     {
-        public int Id { get; set; }
-        public string Name { get; set; }
+        Task<List<BookTypeDto>> GetAllBookTypesAsync();
     }
 }

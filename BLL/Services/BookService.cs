@@ -28,7 +28,7 @@ namespace BLL.Services
             return _mapper.Map<IEnumerable<BookDto>>(entities);
         }
 
-        public async Task<BookDto> ReadByIdAsync(Guid id)
+        public async Task<BookDto> ReadByIdAsync(int id)
         {
             var book = await _uow.Books.ReadByIdAsync(id)
                 ?? throw new KeyNotFoundException($"Book {id} not found");
@@ -44,13 +44,18 @@ namespace BLL.Services
             return _mapper.Map<IEnumerable<BookDto>>(list);
         }
 
-        public async Task<IEnumerable<BookDto>> FilterByTypeAsync(BookType type)
+        public async Task<IEnumerable<BookDto>> FilterByTypeAsync(int typeId)
         {
-            var list = await _uow.Books.FindAsync(b => b.AvailableTypes.HasFlag(type));
-            return _mapper.Map<IEnumerable<BookDto>>(list);
+            // читаємо всі книги (або, краще — через репозиторій FindAsync, якщо реалізовано)
+            var books = await _uow.Books.ReadAllAsync();
+            // фільтруємо по зв’язаних сутностях BookType (ICollection<BookTypeEntity>)
+            var filtered = books
+                .Where(b => b.AvailableTypes.Any(bt => bt.Id == typeId))
+                .ToList();
+            return _mapper.Map<IEnumerable<BookDto>>(filtered);
         }
 
-        public async Task<IEnumerable<BookDto>> FilterByGenreAsync(Guid genreId)
+        public async Task<IEnumerable<BookDto>> FilterByGenreAsync(int genreId)
         {
             var list = await _uow.Books.FindAsync(b => b.GenreId == genreId);
             return _mapper.Map<IEnumerable<BookDto>>(list);
@@ -72,7 +77,7 @@ namespace BLL.Services
             await _uow.CommitAsync();
         }
 
-        public async Task DeleteAsync(Guid id)
+        public async Task DeleteAsync(int id)
         {
             var existing = await _uow.Books.ReadByIdAsync(id)
                 ?? throw new KeyNotFoundException($"Book {id} not found");

@@ -14,12 +14,14 @@ namespace BLL.Factory
         {
             return new Book
             {
-                Id = dto.Id == Guid.Empty ? Guid.NewGuid() : dto.Id,
+                Id = dto.Id == 0 ? 0 : dto.Id,
                 Title = dto.Title,
                 Author = dto.Author,
                 Publisher = dto.Publisher,
                 PublicationYear = dto.PublicationYear,
-                AvailableTypes = dto.AvailableTypes,
+                AvailableTypes = dto.AvailableTypeIds
+                               .Select(id => new BookTypeEntity { Id = id })
+                               .ToList(),
                 GenreId = dto.GenreId,
                 Copies = new List<BookCopy>() // no physical copies
             };

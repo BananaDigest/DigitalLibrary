@@ -18,12 +18,12 @@ namespace API.Controllers
         public async Task<IActionResult> GetAll()
             => Ok(await _svc.ReadAllAsync());
 
-        [HttpGet("{id:guid}")]
-        public async Task<IActionResult> GetById(Guid id)
+        [HttpGet("{id:int}")]
+        public async Task<IActionResult> GetById(int id)
             => Ok(await _svc.ReadByIdAsync(id));
 
-        [HttpGet("by-user/{userId:guid}")]
-        public async Task<IActionResult> GetByUser(Guid userId)
+        [HttpGet("by-user/{userId:int}")]
+        public async Task<IActionResult> GetByUser(int userId)
             => Ok(await _svc.ReadByUserAsync(userId));
 
         [HttpPost]
@@ -33,16 +33,16 @@ namespace API.Controllers
             return CreatedAtAction(nameof(GetById), new { id = dto.Id }, null);
         }
 
-        [HttpPut("{id:guid}")]
-        public async Task<IActionResult> Update(Guid id, [FromBody] ActionOrderDto dto)
+        [HttpPut("{id:int}")]
+        public async Task<IActionResult> Update(int id, [FromBody] ActionOrderDto dto)
         {
             dto.Id = id;
             await _svc.UpdateAsync(dto);
             return NoContent();
         }
 
-        [HttpDelete("{id:guid}")]
-        public async Task<IActionResult> Delete(Guid id)
+        [HttpDelete("{id:int}")]
+        public async Task<IActionResult> Delete(int id)
         {
             await _svc.DeleteAsync(id);
             return NoContent();

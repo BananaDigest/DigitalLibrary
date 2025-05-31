@@ -21,8 +21,8 @@ namespace API.Controllers
         public async Task<IActionResult> GetAll()
             => Ok(await _svc.ReadAllAsync());
 
-        [HttpGet("{id:guid}")]
-        public async Task<IActionResult> GetById(Guid id)
+        [HttpGet("{id:int}")]
+        public async Task<IActionResult> GetById(int id)
             => Ok(await _svc.ReadByIdAsync(id));
 
         [HttpGet("search")]
@@ -37,18 +37,18 @@ namespace API.Controllers
             return CreatedAtAction(nameof(GetById), new { id = dto.Id }, null);
         }
 
-        [HttpPut("{id:guid}")]
+        [HttpPut("{id:int}")]
         [Authorize(Roles = "Manager,Admin")]
-        public async Task<IActionResult> Update(Guid id, [FromBody] ActionBookDto dto)
+        public async Task<IActionResult> Update(int id, [FromBody] ActionBookDto dto)
         {
             dto.Id = id;
             await _svc.UpdateAsync(dto);
             return NoContent();
         }
 
-        [HttpDelete("{id:guid}")]
+        [HttpDelete("{id:int}")]
         [Authorize(Roles = "Manager,Admin")]
-        public async Task<IActionResult> Delete(Guid id)
+        public async Task<IActionResult> Delete(int id)
         {
             await _svc.DeleteAsync(id);
             return NoContent();

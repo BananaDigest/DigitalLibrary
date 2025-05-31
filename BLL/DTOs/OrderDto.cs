@@ -9,11 +9,11 @@ namespace BLL.DTOs
 {
     public class OrderDto
     {
-        public Guid Id { get; set; }
-        public Guid UserId { get; set; }
-        public Guid BookId { get; set; }
+        public int Id { get; set; }
+        public int UserId { get; set; }
+        public int BookId { get; set; }
         public BookType OrderType { get; set; }
-        public Guid? BookCopyId { get; set; }
+        public int? BookCopyId { get; set; }
         public DateTime OrderDate { get; set; }
     }
 

@@ -28,14 +28,14 @@ namespace BLL.Services
             return _mapper.Map<IEnumerable<OrderDto>>(list);
         }
 
-        public async Task<OrderDto> ReadByIdAsync(Guid id)
+        public async Task<OrderDto> ReadByIdAsync(int id)
         {
             var order = await _uow.Orders.ReadByIdAsync(id)
                 ?? throw new KeyNotFoundException($"Order {id} not found");
             return _mapper.Map<OrderDto>(order);
         }
 
-        public async Task<IEnumerable<OrderDto>> ReadByUserAsync(Guid userId)
+        public async Task<IEnumerable<OrderDto>> ReadByUserAsync(int userId)
         {
             var list = await _uow.Orders.FindAsync(o => o.UserId == userId);
             return _mapper.Map<IEnumerable<OrderDto>>(list);
@@ -57,7 +57,7 @@ namespace BLL.Services
             await _uow.CommitAsync();
         }
 
-        public async Task DeleteAsync(Guid id)
+        public async Task DeleteAsync(int id)
         {
             var existing = await _uow.Orders.ReadByIdAsync(id)
                 ?? throw new KeyNotFoundException($"Order {id} not found");

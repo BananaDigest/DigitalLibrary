@@ -51,9 +51,13 @@ namespace API.DependencyInjection
             builder.RegisterType<UserService>()
                    .As<IUserService>()
                    .InstancePerLifetimeScope();
+            builder.RegisterType<BookTypeService>()
+                   .As<IBookTypeService>()
+                   .InstancePerLifetimeScope();
 
             // Facade
             builder.RegisterType<LibraryFacade>()
+                   .AsSelf()
                    .InstancePerLifetimeScope();
         }
     }

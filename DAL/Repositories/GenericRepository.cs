@@ -20,7 +20,7 @@ namespace DAL.Repositories
             _dbSet = context.Set<TEntity>();
         }
 
-        public async Task<TEntity> ReadByIdAsync(Guid id)
+        public async Task<TEntity> ReadByIdAsync(int id)
         {
             return await _dbSet.FindAsync(id);
         }

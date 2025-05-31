@@ -15,29 +15,26 @@ namespace BLL.Factory
         {
             var book = new Book
             {
-                Id = dto.Id == Guid.Empty ? Guid.NewGuid() : dto.Id,
+                Id = dto.Id == 0 ? 0 : dto.Id,
                 Title = dto.Title,
                 Author = dto.Author,
                 Publisher = dto.Publisher,
                 PublicationYear = dto.PublicationYear,
-                AvailableTypes = dto.AvailableTypes,
+                AvailableTypes = dto.AvailableTypeIds
+                               .Select(id => new BookTypeEntity { Id = id })
+                               .ToList(),
                 GenreId = dto.GenreId
             };
-            // Initialize copies if Paper
-            if (dto.AvailableTypes.HasFlag(BookType.Paper))
-            {
                 book.Copies = new List<BookCopy>();
-                for (int i = 1; i <= 5; i++) // default 5 copies
+                for (int i = 1; i <= 5; i++) // дефолтно 5 копій
                 {
                     book.Copies.Add(new BookCopy
                     {
-                        Id = Guid.NewGuid(),
-                        BookId = book.Id,
+                        Book = book,
                         CopyNumber = i,
                         IsAvailable = true
                     });
                 }
-            }
             return book;
         }
     }
