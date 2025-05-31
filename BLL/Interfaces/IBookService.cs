@@ -15,5 +15,6 @@ namespace BLL.Interfaces
         Task CreateAsync(ActionBookDto dto);
         Task DeleteAsync(int id);
         Task UpdateAsync(int bookId, ActionBookDto dto);
+        Task<List<BookDto>> ReadByTypeAsync(int typeId);
     }
 }

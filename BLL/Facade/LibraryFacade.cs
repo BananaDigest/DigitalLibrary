@@ -63,6 +63,9 @@ namespace BLL.Facade
         public Task UpdateBookAsync(int bookId, ActionBookDto dto) =>
             _bookService.UpdateAsync(bookId, dto);
 
+        public async Task<List<BookDto>> ReadBooksByTypeAsync(int typeId)=>
+            await _bookService.ReadByTypeAsync(typeId);
+
         /// <summary>Видалити книгу.</summary>
         public Task DeleteBookAsync(int id) =>
             _bookService.DeleteAsync(id);

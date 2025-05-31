@@ -144,11 +144,59 @@ namespace ConsoleLibraryApp
 
         static async Task FilterByType(LibraryFacade f)
         {
-            Console.WriteLine("Select type: 1) Paper 2) Audio 3) Electronic");
-            int typeId = int.Parse(Console.ReadLine());
-            var books = await f.FilterBooksByTypeAsync(typeId);
-            foreach (var b in books)
-                Console.WriteLine($"{b.Id} | {b.Title} | {b.AvailableTypeIds}");
+            // 1) Виводимо перелік типів (щоб користувач вибрав)
+            Console.WriteLine("Select type:");
+            Console.WriteLine("1) Paper");
+            Console.WriteLine("2) Audio");
+            Console.WriteLine("3) Electronic");
+            Console.Write("Choice: ");
+
+            var typeChoice = Console.ReadLine()?.Trim();
+            Console.WriteLine();
+
+            int typeId;
+            switch (typeChoice)
+            {
+                case "1":
+                    typeId = (int)BookType.Paper;
+                    break;
+                case "2":
+                    typeId = (int)BookType.Audio;
+                    break;
+                case "3":
+                    typeId = (int)BookType.Electronic;
+                    break;
+                default:
+                    Console.WriteLine("Невірний тип. Повертаємось у меню.\n");
+                    return;
+            }
+
+            // 2) Викликаємо фасад, щоб отримати книги за обраним типом
+            var filtered = await f.ReadBooksByTypeAsync(typeId);
+
+            // 3) Якщо нічого не знайдено, повідомляємо
+            if (filtered == null || filtered.Count == 0)
+            {
+                Console.WriteLine("Немає книг із таким типом.\n");
+                return;
+            }
+
+            // 4) Виводимо знайдені книги
+            Console.WriteLine($"=== Books of Type {(BookType)typeId} ===");
+            foreach (var b in filtered)
+            {
+                Console.WriteLine(
+                    $"{b.Id} | {b.Title} | {b.Author} | " +
+                    $"InitCopies: {b.InitialCopies} | " +
+                    $"AvailCopies: {b.AvailableCopies} | " +
+                    $"Types: {string.Join(", ", b.AvailableTypeIds)}"
+                );
+            }
+            Console.WriteLine();
+
+            Console.WriteLine("Press any key...");
+            Console.ReadKey();
+            Console.WriteLine();
         }
 
         static async Task FilterByGenre(LibraryFacade f)

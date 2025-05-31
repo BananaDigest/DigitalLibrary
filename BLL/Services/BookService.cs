@@ -71,6 +71,18 @@ namespace BLL.Services
             var list = await _uow.Books.FindAsync(b => b.GenreId == genreId);
             return _mapper.Map<IEnumerable<BookDto>>(list);
         }
+        public async Task<List<BookDto>> ReadByTypeAsync(int typeId)
+        {
+            // Повертаємо всі книги, в яких колекція AvailableTypes містить певний typeId
+            var entities = await _uow.Books
+                .ReadAll()
+                .Include(b => b.AvailableTypes)
+                .Include(b => b.Copies)
+                .Where(b => b.AvailableTypes.Any(t => t.Id == typeId))
+                .ToListAsync();
+
+            return _mapper.Map<List<BookDto>>(entities);
+        }
 
         public async Task CreateAsync(ActionBookDto dto)
         {
