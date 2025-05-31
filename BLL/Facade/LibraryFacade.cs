@@ -60,8 +60,8 @@ namespace BLL.Facade
             _bookService.CreateAsync(dto);
 
         /// <summary>Оновити існуючу книгу.</summary>
-        public Task UpdateBookAsync(ActionBookDto dto) =>
-            _bookService.UpdateAsync(dto);
+        public Task UpdateBookAsync(int bookId, ActionBookDto dto) =>
+            _bookService.UpdateAsync(bookId, dto);
 
         /// <summary>Видалити книгу.</summary>
         public Task DeleteBookAsync(int id) =>

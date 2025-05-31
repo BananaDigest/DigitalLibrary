@@ -1,4 +1,5 @@
 ﻿using DAL.Context;
+using Domain.Entities;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
@@ -49,5 +50,11 @@ namespace DAL.Repositories
         {
             _dbSet.Remove(entity);
         }
+
+        public IQueryable<Book> ReadAll()
+        {
+            return _context.Set<Book>();
+        }
+
     }
 }

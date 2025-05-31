@@ -14,6 +14,7 @@ using Domain.Enums;
 using BLL.DTOs;
 using Microsoft.Extensions.Configuration;
 using Domain.Entities;
+using BLL.Factory;
 
 namespace ConsoleLibraryApp
 {
@@ -33,6 +34,7 @@ namespace ConsoleLibraryApp
             services.AddDbContext<DigitalLibraryContext>(opt =>
                 opt.UseSqlServer(config.GetConnectionString("DefaultConnection")));
             services.AddScoped<IUnitOfWork, UnitOfWork>();
+            services.AddScoped<IBookFactory, BookFactory>();
 
             // AutoMapper
             services.AddAutoMapper(typeof(AutoMapperProfiles).Assembly);
@@ -128,7 +130,7 @@ namespace ConsoleLibraryApp
         {
             var books = await f.GetAllBooksAsync();
             foreach (var b in books)
-                Console.WriteLine($"{b.Id} | {b.Title} | {b.Author} | {b.Publisher} | Types: {b.AvailableTypes}");
+                Console.WriteLine($"{b.Id} | {b.Title} | {b.Author} | {b.Publisher} | Types: {b.AvailableTypeIds}");
         }
 
         static async Task SearchBooks(LibraryFacade f)
@@ -146,7 +148,7 @@ namespace ConsoleLibraryApp
             int typeId = int.Parse(Console.ReadLine());
             var books = await f.FilterBooksByTypeAsync(typeId);
             foreach (var b in books)
-                Console.WriteLine($"{b.Id} | {b.Title} | {b.AvailableTypes}");
+                Console.WriteLine($"{b.Id} | {b.Title} | {b.AvailableTypeIds}");
         }
 
         static async Task FilterByGenre(LibraryFacade f)
@@ -203,7 +205,7 @@ namespace ConsoleLibraryApp
             {
                 case "1": await CreateBook(f); break;
                 case "2": await UpdateBook(f); break;
-                case "3": await DeleteGenre(f); break;
+                case "3": await DeleteBook(f); break;
                 case "0": return;
                 default: Console.WriteLine("Invalid"); break;
             }
@@ -213,27 +215,37 @@ namespace ConsoleLibraryApp
         static async Task CreateBook(LibraryFacade f)
         {
             var dto = new ActionBookDto();
-            Console.Write("Enter Title: "); dto.Title = Console.ReadLine() ?? string.Empty;
-            Console.Write("Enter Author: "); dto.Author = Console.ReadLine() ?? string.Empty;
-            Console.Write("Enter Publisher: "); dto.Publisher = Console.ReadLine() ?? string.Empty;
-            Console.Write("Enter PublicationYear: "); dto.PublicationYear = int.TryParse(Console.ReadLine(), out var py) ? py : 0;
+            Console.Write("Enter Title: ");
+            dto.Title = Console.ReadLine() ?? string.Empty;
+            Console.Write("Enter Author: ");
+            dto.Author = Console.ReadLine() ?? string.Empty;
+            Console.Write("Enter Publisher: ");
+            dto.Publisher = Console.ReadLine() ?? string.Empty;
+            Console.Write("Enter PublicationYear: ");
+            dto.PublicationYear = int.TryParse(Console.ReadLine(), out var year) ? year : 0;
 
-            // Типи книжок
-            var types = await f.GetAllBookTypesAsync();
-            Console.WriteLine("Available Types:");
+            // --- Ось тут: виводимо всі доступні типи BookTypeEntity
+            var types = await f.GetAllBookTypesAsync(); // має повернути List<BookTypeDto> або List<Type>
             foreach (var t in types)
                 Console.WriteLine($"{t.Id} | {t.Name}");
             Console.Write("Enter AvailableTypeIds (comma-separated): ");
-            var input = Console.ReadLine() ?? string.Empty;
-            dto.AvailableTypeIds = input
+            var rawTypes = Console.ReadLine() ?? string.Empty;
+            dto.AvailableTypeIds = rawTypes
                 .Split(',', StringSplitOptions.RemoveEmptyEntries)
                 .Select(s => int.TryParse(s.Trim(), out var id) ? id : -1)
                 .Where(id => id > 0)
                 .ToList();
 
-            // Жанри
+            // Якщо серед AvailableTypeIds є (int)BookType.Paper, то питаємо CopyCount
+            if (dto.AvailableTypeIds.Contains((int)BookType.Paper))
+            {
+                Console.Write("Enter number of paper copies: ");
+                dto.CopyCount = int.TryParse(Console.ReadLine(), out var cnt) ? cnt : 0;
+            }
+            // Інакше CopyCount лишається 0 (за замовчуванням в DTO)
+
+            // --- Ось тут: виводимо жанри
             var genres = await f.GetAllGenresAsync();
-            Console.WriteLine("Available Genres:");
             foreach (var g in genres)
                 Console.WriteLine($"{g.Id} | {g.Name}");
             Console.Write("Enter GenreId: ");
@@ -245,14 +257,167 @@ namespace ConsoleLibraryApp
 
         static async Task UpdateBook(LibraryFacade f)
         {
+            // 1) Виводимо список усіх книг з консольними полями і AvailableTypeIds
             var books = await f.GetAllBooksAsync();
+            Console.WriteLine("=== Список усіх книг ===");
             foreach (var b in books)
-                Console.WriteLine($"{b.Id} | {b.Title} | {b.Author} | {b.Publisher} | {b.PublicationYear} | {b.AvailableTypes}");
-            //#TODO додати реалізацю цього метода і метода DELETE для книжок 
+            {
+                Console.WriteLine($"{b.Id} | {b.Title} | {b.Author} | {b.Publisher} | Types: {string.Join(", ", b.AvailableTypeIds)}");
+            }
 
+            try
+            {
+                // 2) Запитуємо у користувача Id тієї книги, яку хочемо оновити
+                Console.Write("Enter Book Id to update: ");
+                if (!int.TryParse(Console.ReadLine(), out var bookId))
+                {
+                    Console.WriteLine("Невірний формат Id. Повертаємось у меню.\n");
+                    return;
+                }
+
+                // 3) Завантажуємо деталі обраної книги через фасад
+                var existing = await f.GetBookByIdAsync(bookId);
+                if (existing == null)
+                {
+                    Console.WriteLine($"Книга з Id = {bookId} не знайдена.\n");
+                    return;
+                }
+
+                // 4) Виводимо поточні значення полів обраної книги
+                Console.WriteLine($"Current Title: {existing.Title}");
+                Console.WriteLine($"Current Author: {existing.Author}");
+                Console.WriteLine($"Current Publisher: {existing.Publisher}");
+                Console.WriteLine($"Current PublicationYear: {existing.PublicationYear}");
+                Console.WriteLine($"Current GenreId: {existing.GenreId}");
+                Console.WriteLine($"Current AvailableTypeIds: {string.Join(", ", existing.AvailableTypeIds)}");
+                Console.WriteLine($"Current CopyCount (якщо є копії): {existing.AvailableCopies}");
+                Console.WriteLine("-------------------------------------------------------");
+
+                // 5) Через DAL (фасад) отримуємо всю таблицю з типами книг
+                var allTypes = await f.GetAllBookTypesAsync(); // повертає List<BookTypeDto>
+                                                               // 6) Фільтруємо саме ті BookTypeEntity, Id яких міститься в existing.AvailableTypeIds
+                var matchedTypes = allTypes
+                    .Where(t => existing.AvailableTypeIds.Contains(t.Id))
+                    .ToList();
+
+                // 7) Виводимо знайдені типи для цієї книги
+                Console.WriteLine("Existing Types (з таблиці BookTypes):");
+                foreach (var t in matchedTypes)
+                {
+                    Console.WriteLine($"  {t.Id} | {t.Name}");
+                }
+                Console.WriteLine("-------------------------------------------------------");
+
+                // 8) Тепер просимо ввести нові дані для оновлення
+                Console.Write("Enter new Title: ");
+                var title = Console.ReadLine()?.Trim();
+
+                Console.Write("Enter new Author: ");
+                var author = Console.ReadLine()?.Trim();
+
+                Console.Write("Enter new Publisher: ");
+                var publisher = Console.ReadLine()?.Trim();
+
+                Console.Write("Enter new PublicationYear: ");
+                if (!int.TryParse(Console.ReadLine(), out var year))
+                {
+                    Console.WriteLine("Невірний формат року. Повертаємось у меню.\n");
+                    return;
+                }
+
+                Console.Write("Enter new GenreId: ");
+                if (!int.TryParse(Console.ReadLine(), out var genreId))
+                {
+                    Console.WriteLine("Невірний формат GenreId. Повертаємось у меню.\n");
+                    return;
+                }
+
+                Console.Write("Enter AvailableTypeIds (comma-separated, напр.: 0,1): ");
+                var rawTypes = Console.ReadLine() ?? "";
+                var typeIds = rawTypes
+                    .Split(',', StringSplitOptions.RemoveEmptyEntries)
+                    .Select(s => s.Trim())
+                    .Where(s => int.TryParse(s, out _))
+                    .Select(int.Parse)
+                    .Distinct()
+                    .ToList();
+
+                if (typeIds.Count == 0)
+                {
+                    Console.WriteLine("Принаймні один тип має бути задано. Повертаємось у меню.\n");
+                    return;
+                }
+
+                int copyCount = 0;
+                if (typeIds.Contains((int)BookType.Paper))
+                {
+                    Console.Write("Enter new CopyCount (кількість паперових копій): ");
+                    if (!int.TryParse(Console.ReadLine(), out copyCount) || copyCount < 1)
+                    {
+                        Console.WriteLine("Невірний формат CopyCount. Повертаємось у меню.\n");
+                        return;
+                    }
+                }
+
+                // 9) Формуємо DTO для оновлення
+                var dto = new ActionBookDto
+                {
+                    Title = title,
+                    Author = author,
+                    Publisher = publisher,
+                    PublicationYear = year,
+                    GenreId = genreId,
+                    AvailableTypeIds = typeIds,
+                    CopyCount = copyCount
+                };
+
+                // 10) Викликаємо метод оновлення через фасад
+                await f.UpdateBookAsync(bookId, dto);
+
+                Console.WriteLine($"Книга з Id = {bookId} успішно оновлена.\n");
+            }
+            catch (KeyNotFoundException knf)
+            {
+                Console.WriteLine($"Помилка: {knf.Message}\n");
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Сталася помилка під час оновлення: {ex.Message}\n");
+            }
+        }
+        static async Task DeleteBook(LibraryFacade facade)
+        {
+            try
+            {
+                Console.Write("Enter Book Id to delete: ");
+                if (!int.TryParse(Console.ReadLine(), out var bookId))
+                {
+                    Console.WriteLine("Невірний формат Id. Повертаємось у меню.\n");
+                    return;
+                }
+
+                // Опційна перевірка:
+                var existing = await facade.GetBookByIdAsync(bookId);
+                if (existing == null)
+                {
+                    Console.WriteLine($"Книга з Id = {bookId} не знайдена.\n");
+                    return;
+                }
+
+                await facade.DeleteBookAsync(bookId);
+                Console.WriteLine($"Книга з Id = {bookId} успішно видалена.\n");
+            }
+            catch (KeyNotFoundException knf)
+            {
+                Console.WriteLine($"Помилка: {knf.Message}\n");
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Сталася помилка під час видалення: {ex.Message}\n");
+            }
         }
 
-            static async Task ManageOrders(LibraryFacade f)
+        static async Task ManageOrders(LibraryFacade f)
         {
             Console.WriteLine("1) View All 2) Delete");
             var opt = Console.ReadLine();

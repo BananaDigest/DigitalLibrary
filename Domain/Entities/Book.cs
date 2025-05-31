@@ -14,6 +14,10 @@ namespace Domain.Entities
 
         public int GenreId { get; set; }
         public Genre Genre { get; set; }
+        public int InitialCopies { get; set; }
+        public int AvailableCopies { get; set; }
+        public int DownloadCount { get; set; }
+        public int ListenCount { get; set; }
 
         public ICollection<BookCopy> Copies { get; set; } = new List<BookCopy>();
         public ICollection<BookTypeEntity> AvailableTypes { get; set; } = new List<BookTypeEntity>();

@@ -25,12 +25,7 @@ namespace BLL.Mapping
 
 
             // DTO -> Domain
-            CreateMap<ActionBookDto, Book>()
-                .ForMember(dest => dest.AvailableTypes,
-                    opt => opt.MapFrom((src, dest, _, ctx) =>
-                    src.AvailableTypeIds
-                       .Select(id => new BookTypeEntity { Id = id })
-                       .ToList()));
+            CreateMap<ActionBookDto, Book>();
             CreateMap<UserDto, User>();
 
             // При необхідності додати кастомні налаштування:

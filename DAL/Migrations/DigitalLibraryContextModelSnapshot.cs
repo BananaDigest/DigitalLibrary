@@ -49,7 +49,19 @@ namespace DAL.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<int>("AvailableCopies")
+                        .HasColumnType("int");
+
+                    b.Property<int>("DownloadCount")
+                        .HasColumnType("int");
+
                     b.Property<int>("GenreId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("InitialCopies")
+                        .HasColumnType("int");
+
+                    b.Property<int>("ListenCount")
                         .HasColumnType("int");
 
                     b.Property<int>("PublicationYear")

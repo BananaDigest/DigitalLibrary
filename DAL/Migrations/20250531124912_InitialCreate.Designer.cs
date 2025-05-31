@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace DAL.Migrations
 {
     [DbContext(typeof(DigitalLibraryContext))]
-    [Migration("20250530223616_InitialCreate")]
+    [Migration("20250531124912_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -24,6 +24,21 @@ namespace DAL.Migrations
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
+
+            modelBuilder.Entity("BookBookType", b =>
+                {
+                    b.Property<int>("BookId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("BookTypeId")
+                        .HasColumnType("int");
+
+                    b.HasKey("BookId", "BookTypeId");
+
+                    b.HasIndex("BookTypeId");
+
+                    b.ToTable("BookBookType");
+                });
 
             modelBuilder.Entity("Domain.Entities.Book", b =>
                 {
@@ -37,10 +52,19 @@ namespace DAL.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int>("AvailableTypes")
+                    b.Property<int>("AvailableCopies")
+                        .HasColumnType("int");
+
+                    b.Property<int>("DownloadCount")
                         .HasColumnType("int");
 
                     b.Property<int>("GenreId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("InitialCopies")
+                        .HasColumnType("int");
+
+                    b.Property<int>("ListenCount")
                         .HasColumnType("int");
 
                     b.Property<int>("PublicationYear")
@@ -85,6 +109,23 @@ namespace DAL.Migrations
                     b.ToTable("BookCopies");
                 });
 
+            modelBuilder.Entity("Domain.Entities.BookTypeEntity", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("BookTypeEntity");
+                });
+
             modelBuilder.Entity("Domain.Entities.Genre", b =>
                 {
                     b.Property<int>("Id")
@@ -119,7 +160,7 @@ namespace DAL.Migrations
                     b.Property<DateTime>("OrderDate")
                         .HasColumnType("datetime2");
 
-                    b.Property<int>("OrderType")
+                    b.Property<int>("OrderTypeId")
                         .HasColumnType("int");
 
                     b.Property<int>("UserId")
@@ -130,6 +171,8 @@ namespace DAL.Migrations
                     b.HasIndex("BookCopyId");
 
                     b.HasIndex("BookId");
+
+                    b.HasIndex("OrderTypeId");
 
                     b.HasIndex("UserId");
 
@@ -171,6 +214,21 @@ namespace DAL.Migrations
                     b.ToTable("Users");
                 });
 
+            modelBuilder.Entity("BookBookType", b =>
+                {
+                    b.HasOne("Domain.Entities.Book", null)
+                        .WithMany()
+                        .HasForeignKey("BookId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Domain.Entities.BookTypeEntity", null)
+                        .WithMany()
+                        .HasForeignKey("BookTypeId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
             modelBuilder.Entity("Domain.Entities.Book", b =>
                 {
                     b.HasOne("Domain.Entities.Genre", "Genre")
@@ -206,6 +264,12 @@ namespace DAL.Migrations
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
+                    b.HasOne("Domain.Entities.BookTypeEntity", "OrderType")
+                        .WithMany()
+                        .HasForeignKey("OrderTypeId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
                     b.HasOne("Domain.Entities.User", "User")
                         .WithMany("Orders")
                         .HasForeignKey("UserId")
@@ -215,6 +279,8 @@ namespace DAL.Migrations
                     b.Navigation("Book");
 
                     b.Navigation("BookCopy");
+
+                    b.Navigation("OrderType");
 
                     b.Navigation("User");
                 });

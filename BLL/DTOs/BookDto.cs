@@ -9,7 +9,7 @@ namespace BLL.DTOs
         public string Author { get; set; }
         public string Publisher { get; set; }
         public int PublicationYear { get; set; }
-        public BookType AvailableTypes { get; set; }
+        public List<int> AvailableTypeIds { get; set; } = new();
         public int GenreId { get; set; }
         public GenreDto Genre { get; set; }
 

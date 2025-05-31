@@ -25,6 +25,7 @@ namespace DAL.UnitOfWork
             Genres = new GenericRepository<Genre>(_context);
             Users = new GenericRepository<User>(_context);
             Orders = new GenericRepository<Order>(_context);
+            BookTypes = new GenericRepository<BookTypeEntity>(_context);
         }
 
         public async Task<int> CommitAsync()

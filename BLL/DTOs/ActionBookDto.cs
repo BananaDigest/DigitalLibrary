@@ -16,5 +16,6 @@ namespace BLL.DTOs
         public int GenreId { get; set; }
         public int Id { get; set; }
         public List<int> AvailableTypeIds { get; set; } = new();
+        public int CopyCount { get; set; } = 0;
     }
 }

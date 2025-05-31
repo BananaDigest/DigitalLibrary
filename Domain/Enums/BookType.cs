@@ -4,8 +4,8 @@ namespace Domain.Enums
 {
     public enum BookType
     {
-        Paper = 0,
-        Electronic =1,
-        Audio = 2
+        Paper = 1,
+        Electronic =2,
+        Audio = 3
     }
 }

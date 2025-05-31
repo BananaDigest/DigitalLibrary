@@ -42,7 +42,7 @@ namespace API.Controllers
         public async Task<IActionResult> Update(int id, [FromBody] ActionBookDto dto)
         {
             dto.Id = id;
-            await _svc.UpdateAsync(dto);
+            await _svc.UpdateAsync(dto.Id, dto);
             return NoContent();
         }
 

@@ -10,6 +10,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using BLL.Mapping;
+using BLL.Factory;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -23,6 +24,7 @@ builder.Services.AddAutoMapper(typeof(AutoMapperProfiles).Assembly);
 
 // 3. BLL-сервіси
 builder.Services.AddScoped<IBookService, BookService>();
+builder.Services.AddScoped<IBookFactory, BookFactory>();
 builder.Services.AddScoped<IGenreService, GenreService>();
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IOrderService, OrderService>();
