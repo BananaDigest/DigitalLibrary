@@ -74,58 +74,79 @@ namespace BLL.Services
 
         public async Task CreateAsync(ActionBookDto dto)
         {
-            if (dto == null)
-                throw new ArgumentNullException(nameof(dto));
+            var bookEntity = _mapper.Map<Book>(dto);
 
-            // 1) Викликаємо фабрику, яка повертає готовий Book з усіма зв’язками:
-            var bookEntity = await _factory.CreateAsync(dto);
+            // 2) Створюємо навігаційну колекцію AvailableTypes
+            bookEntity.AvailableTypes = new List<BookTypeEntity>();
+            foreach (var typeId in dto.AvailableTypeIds.Distinct())
+            {
+                var typeEntity = await _uow.BookTypes.ReadByIdAsync(typeId)
+                                 ?? throw new KeyNotFoundException($"BookTypeEntity with Id = {typeId} not found.");
+                bookEntity.AvailableTypes.Add(typeEntity);
+            }
 
-            // 2) Додаємо новий Book у БД:
+            // 3) Створюємо копії лише якщо є паперовий тип
+            bookEntity.Copies = new List<BookCopy>();
+            if (dto.AvailableTypeIds.Contains((int)BookType.Paper))
+            {
+                // кількість copies = dto.CopyCount
+                for (int i = 1; i <= dto.CopyCount; i++)
+                {
+                    bookEntity.Copies.Add(new BookCopy
+                    {
+                        CopyNumber = i,
+                        IsAvailable = true
+                    });
+                }
+            }
+
+            // 4) Додаємо та зберігаємо
             await _uow.Books.CreateAsync(bookEntity);
-
-            // 3) Комітимо зміни:
             await _uow.CommitAsync();
         }
 
         public async Task UpdateAsync(int bookId, ActionBookDto dto)
         {
-            // 1) Завантажуємо книгу разом із навігаційними властивостями
-            var bookEntity = await _uow.Books.ReadByIdAsync(bookId);
+            var bookEntity = await _uow.Books
+        .ReadAll() // припускаємо, що ReadAll() повертає IQueryable<Book>
+        .Include(b => b.AvailableTypes)
+        .Include(b => b.Copies)
+        .FirstOrDefaultAsync(b => b.Id == bookId);
 
             if (bookEntity == null)
                 throw new KeyNotFoundException($"Book with Id = {bookId} not found.");
 
-            // 2) Оновлюємо прості поля
+            // 2) Оновлюємо основні поля
             bookEntity.Title = dto.Title;
             bookEntity.Author = dto.Author;
             bookEntity.Publisher = dto.Publisher;
             bookEntity.PublicationYear = dto.PublicationYear;
             bookEntity.GenreId = dto.GenreId;
 
-            // 3) Оновлюємо AvailableTypes (join-таблицю book ↔ booktype)
-            //    a) Спершу видалимо ті типи, яких більше немає у новому списку
+            bookEntity.InitialCopies = dto.CopyCount;
+
+            bookEntity.AvailableCopies = dto.CopyCount;
+
+            // 5) Оновлюємо AvailableTypes (як раніше)
             var toRemove = bookEntity.AvailableTypes
                 .Where(bt => !dto.AvailableTypeIds.Contains(bt.Id))
                 .ToList();
-            foreach (var r in toRemove)
-                bookEntity.AvailableTypes.Remove(r);
+            foreach (var oldType in toRemove)
+                bookEntity.AvailableTypes.Remove(oldType);
 
-            //    b) Потім додамо ті типи, яких ще немає у колекції
             var existingTypeIds = bookEntity.AvailableTypes.Select(bt => bt.Id).ToList();
             var toAddIds = dto.AvailableTypeIds
                 .Where(id => !existingTypeIds.Contains(id))
+                .Distinct()
                 .ToList();
-
             foreach (var typeId in toAddIds)
             {
-                var typeEntity = await _uow.BookTypes.ReadByIdAsync(typeId);
-                if (typeEntity == null)
-                    throw new KeyNotFoundException($"BookTypeEntity with Id = {typeId} not found.");
+                var typeEntity = await _uow.BookTypes.ReadByIdAsync(typeId)
+                                 ?? throw new KeyNotFoundException($"BookTypeEntity with Id = {typeId} not found.");
                 bookEntity.AvailableTypes.Add(typeEntity);
             }
 
-            // 4) Оновлюємо Copies (якщо вводили CopyCount)
-            //    Якщо у dto.AvailableTypeIds є Paper (0), потрібно оновити кількість записів у Copies:
+            // 6) Оновлюємо Copies (повністю очищаємо старі → додаємо нові)
             bookEntity.Copies.Clear();
             if (dto.AvailableTypeIds.Contains((int)BookType.Paper))
             {
@@ -133,14 +154,14 @@ namespace BLL.Services
                 {
                     bookEntity.Copies.Add(new BookCopy
                     {
-                        CopyNumber = i,
                         BookId = bookEntity.Id,
+                        CopyNumber = i,
                         IsAvailable = true
                     });
                 }
             }
 
-            // 5) Комітимо зміни — EF Core подбає про join-таблицю автоматично
+            // 7) Зберігаємо зміни
             await _uow.CommitAsync();
         }
 
