@@ -3,6 +3,7 @@ using BLL.DTOs;
 using BLL.Interfaces;
 using DAL.UnitOfWork;
 using Domain.Entities;
+using Domain.Enums;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
@@ -26,6 +27,7 @@ namespace BLL.Services
         public async Task RegisterAsync(UserDto dto)
         {
             var user = _mapper.Map<User>(dto);
+            user.Role = UserRole.Registered;
             await _uow.Users.CreateAsync(user);
             //await _uow.CommitAsync();
             try
@@ -66,6 +68,24 @@ namespace BLL.Services
                 throw new UnauthorizedAccessException("Невірний email або пароль");
 
             return _mapper.Map<UserDto>(user);
+        }
+
+        public async Task UpdateUserAsync(UserDto dto)
+        {
+            var userEntity = await _uow.Users
+                .ReadAllUser()               // IQueryable<User>
+                .FirstOrDefaultAsync(u => u.Id == dto.Id);
+
+            if (userEntity == null)
+                throw new KeyNotFoundException($"User with Id = {dto.Id} not found.");
+
+            // 2) Мапимо оновлені поля з dto (AutoMapper ігнорує роль)
+            _mapper.Map(dto, userEntity);
+
+            _uow.Users.Update(userEntity);
+
+            // 5) Фіксуємо зміни
+            await _uow.CommitAsync();
         }
     }
 }

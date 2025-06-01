@@ -177,7 +177,6 @@ namespace BLL.Services
             await _uow.CommitAsync();
         }
 
-
         public async Task DeleteAsync(int id)
         {
             var bookEntity = await _uow.Books.ReadByIdAsync(id);

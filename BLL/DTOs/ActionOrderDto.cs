@@ -14,5 +14,6 @@ namespace BLL.DTOs
         public BookType OrderType { get; set; }
         public int? BookCopyId { get; set; }
         public int Id { get; set; }
+        public DateTime OrderDate { get; set; }
     }
 }

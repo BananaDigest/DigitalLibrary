@@ -12,6 +12,7 @@ namespace Domain.Entities
 
         public int BookId { get; set; }
         public Book Book { get; set; }
+        public int OrderTypeId { get; set; }
 
         public BookTypeEntity OrderType { get; set; }
 

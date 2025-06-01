@@ -47,10 +47,10 @@ namespace ConsoleLibraryApp
             services.AddScoped<IBookTypeService, BookTypeService>();
 
             // Фасад
-            services.AddScoped<LibraryFacade>();
+            services.AddScoped<ILibraryFacade, LibraryFacade>();
 
             var provider = services.BuildServiceProvider();
-            var facade = provider.GetRequiredService<LibraryFacade>();
+            var facade = provider.GetRequiredService<ILibraryFacade>();
 
             try
             {
@@ -62,7 +62,7 @@ namespace ConsoleLibraryApp
             }
         }
 
-        static async Task RunConsoleAsync(LibraryFacade f)
+        static async Task RunConsoleAsync(ILibraryFacade f)
         {
             UserDto current = null;
             while (true)
@@ -102,8 +102,10 @@ namespace ConsoleLibraryApp
                         Console.WriteLine("4) Manage Books");
                     if (current.Role == nameof(UserRole.Manager))
                         Console.WriteLine("6) Manage Genres");
-                    if (current.Role == nameof(UserRole.Administrator))
+                    if (current.Role == nameof(UserRole.Administrator)) 
                         Console.WriteLine("5) Manage Orders");
+                    if (current.Role == nameof(UserRole.Registered))
+                        Console.WriteLine("7) Update Profile");
                     Console.WriteLine("9) Logout");
                     Console.WriteLine("0) Exit");
                     Console.Write("Select: ");
@@ -116,6 +118,7 @@ namespace ConsoleLibraryApp
                         case "4": await ManageBooks(f); break;
                         case "5": await ManageOrders(f); break;
                         case "6": await ManageGenres(f); break;
+                        case "7": await UpdateProfile(f); break;
                         case "9": current = null; break;
                         case "0": return;
                         default: Console.WriteLine("Invalid"); break;
@@ -126,14 +129,14 @@ namespace ConsoleLibraryApp
             }
         }
 
-        static async Task ViewCatalog(LibraryFacade f)
+        static async Task ViewCatalog(ILibraryFacade f)
         {
             var books = await f.GetAllBooksAsync();
             foreach (var b in books)
                 Console.WriteLine($"{b.Id} | {b.Title} | {b.Author} | {b.Publisher} | Types: {b.AvailableTypeIds}");
         }
 
-        static async Task SearchBooks(LibraryFacade f)
+        static async Task SearchBooks(ILibraryFacade f)
         {
             Console.Write("Enter search term: ");
             var term = Console.ReadLine();
@@ -142,7 +145,7 @@ namespace ConsoleLibraryApp
                 Console.WriteLine($"{b.Id} | {b.Title} | {b.Author}");
         }
 
-        static async Task FilterByType(LibraryFacade f)
+        static async Task FilterByType(ILibraryFacade f)
         {
             // 1) Виводимо перелік типів (щоб користувач вибрав)
             Console.WriteLine("Select type:");
@@ -199,7 +202,7 @@ namespace ConsoleLibraryApp
             Console.WriteLine();
         }
 
-        static async Task FilterByGenre(LibraryFacade f)
+        static async Task FilterByGenre(ILibraryFacade f)
         {
             var genres = await f.GetAllGenresAsync();
             Console.WriteLine("Available genres:");
@@ -212,7 +215,7 @@ namespace ConsoleLibraryApp
                 Console.WriteLine($"{b.Id} | {b.Title} | GenreId: {b.GenreId}");
         }
 
-        static async Task<UserDto> Register(LibraryFacade f)
+        static async Task<UserDto> Register(ILibraryFacade f)
         {
             var dto = new UserDto();
             Console.Write("FirstName: "); dto.FirstName = Console.ReadLine();
@@ -222,30 +225,161 @@ namespace ConsoleLibraryApp
             return await f.RegisterUserAsync(dto);
         }
 
-        static async Task<UserDto> Login(LibraryFacade f)
+        static async Task<UserDto> Login(ILibraryFacade f)
         {
             Console.Write("Email: "); var email = Console.ReadLine();
             Console.Write("Password: "); var pwd = Console.ReadLine();
             return await f.AuthenticateAsync(email, pwd);
         }
 
-        static async Task PlaceOrder(LibraryFacade f, int userId)
+        private static async Task UpdateProfile(ILibraryFacade f)
         {
-            Console.Write("BookId: "); var bid = int.Parse(Console.ReadLine());
-            Console.WriteLine("Select type: 1) Paper 2) Audio 3) Electronic");
-            var opt = Console.ReadLine();
-            var type = opt switch
+            Console.Write("Enter your UserId: ");
+            if (!int.TryParse(Console.ReadLine(), out var userId))
             {
-                "1" => BookType.Paper,
-                "2" => BookType.Audio,
-                _ => BookType.Electronic
-            };
-            var dto = new ActionOrderDto { UserId = userId, BookId = bid, OrderType = type };
-            await f.CreateOrderAsync(dto);
-            Console.WriteLine("Order placed");
+                Console.WriteLine("Невірний формат UserId.\n");
+                return;
+            }
+
+            UserDto user;
+            try
+            {
+                user = await f.GetUserByIdAsync(userId);
+            }
+            catch (KeyNotFoundException knf)
+            {
+                Console.WriteLine($"Помилка: {knf.Message}\n");
+                return;
+            }
+
+            Console.WriteLine("=== Update My Profile ===");
+            Console.Write($"Current Email ({user.Email}): ");
+            var newEmail = Console.ReadLine()?.Trim();
+            if (!string.IsNullOrEmpty(newEmail))
+                user.Email = newEmail;
+
+            Console.Write($"Current Password (****): ");
+            var newPassword = Console.ReadLine()?.Trim();
+            if (!string.IsNullOrEmpty(newPassword))
+                user.Password = newPassword;
+
+            Console.Write($"Current First Name ({user.FirstName}): ");
+            var newFirst = Console.ReadLine()?.Trim();
+            if (!string.IsNullOrEmpty(newFirst))
+                user.FirstName = newFirst;
+
+            Console.Write($"Current Last Name ({user.LastName}): ");
+            var newLast = Console.ReadLine()?.Trim();
+            if (!string.IsNullOrEmpty(newLast))
+                user.LastName = newLast;
+
+
+            try
+            {
+                await f.UpdateUserAsync(user);
+                Console.WriteLine("Profile successfully updated.\n");
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Помилка під час оновлення: {ex.Message}\n");
+            }
         }
 
-        static async Task ManageBooks(LibraryFacade f)
+        static async Task PlaceOrder(ILibraryFacade f, int userId)
+        {
+            try
+            {
+                Console.Write("BookId: ");
+                if (!int.TryParse(Console.ReadLine(), out var bookId))
+                {
+                    Console.WriteLine("Невірний формат BookId.\n");
+                    return;
+                }
+
+                Console.WriteLine("Select type: 1) Paper 2) Audio 3) Electronic");
+                Console.Write("Choice: ");
+                var typeChoice = Console.ReadLine()?.Trim();
+                BookType orderType;
+                switch (typeChoice)
+                {
+                    case "1":
+                        orderType = BookType.Paper;
+                        break;
+                    case "2":
+                        orderType = BookType.Audio;
+                        break;
+                    case "3":
+                        orderType = BookType.Electronic;
+                        break;
+                    default:
+                        Console.WriteLine("Невірний тип.\n");
+                        return;
+                }
+
+                // Для Audio/Electronic BookCopyId лишається null
+                int? bookCopyId = null;
+
+                // Якщо це Paper, BookCopyId ми не запитуємо — сервіс знайде першу вільну копію
+                // (тому лишаємо bookCopyId = null)
+
+                Console.Write("UserId: ");
+                if (!int.TryParse(Console.ReadLine(), out var enteredUserId))
+                {
+                    Console.WriteLine("Невірний формат UserId.\n");
+                    return;
+                }
+
+                var dto = new ActionOrderDto
+                {
+                    UserId = enteredUserId,
+                    BookId = bookId,
+                    OrderType = orderType,
+                    BookCopyId = bookCopyId
+                    // OrderDate призначається всередині сервісу
+                };
+
+                await f.CreateOrderAsync(dto);
+                Console.WriteLine("Order successfully placed.\n");
+            }
+            catch (KeyNotFoundException knf)
+            {
+                Console.WriteLine($"Помилка: {knf.Message}\n");
+            }
+            catch (InvalidOperationException ioe)
+            {
+                Console.WriteLine($"Помилка: {ioe.Message}\n");
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Сталася помилка під час оформлення замовлення: {ex.Message}\n");
+            }
+        }
+
+        static async Task CancelOrder(ILibraryFacade f)
+        {
+            try
+            {
+                Console.Write("Enter OrderId to cancel: ");
+                if (!int.TryParse(Console.ReadLine(), out var orderId))
+                {
+                    Console.WriteLine("Невірний формат OrderId.\n");
+                    return;
+                }
+
+                await f.DeleteOrderAsync(orderId);
+                Console.WriteLine("Order successfully canceled.\n");
+            }
+            catch (KeyNotFoundException knf)
+            {
+                Console.WriteLine($"Помилка: {knf.Message}\n");
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Сталася помилка під час скасування замовлення: {ex.Message}\n");
+            }
+        }
+
+        static async Task ManageBooks(ILibraryFacade f)
         {
             Console.WriteLine("1) Create 2) Update 3) Delete");
             var opt = Console.ReadLine();
@@ -260,7 +394,7 @@ namespace ConsoleLibraryApp
 
         }
 
-        static async Task CreateBook(LibraryFacade f)
+        static async Task CreateBook(ILibraryFacade f)
         {
             try
             {
@@ -350,7 +484,7 @@ namespace ConsoleLibraryApp
             }
         }
 
-        static async Task UpdateBook(LibraryFacade f)
+        static async Task UpdateBook(ILibraryFacade f)
         {
             var books = await f.GetAllBooksAsync();
             Console.WriteLine("=== Список усіх книг ===");
@@ -475,7 +609,7 @@ namespace ConsoleLibraryApp
                 Console.WriteLine($"Сталася помилка під час оновлення: {ex.Message}\n");
             }
         }
-        static async Task DeleteBook(LibraryFacade facade)
+        static async Task DeleteBook(ILibraryFacade facade)
         {
             try
             {
@@ -507,14 +641,92 @@ namespace ConsoleLibraryApp
             }
         }
 
-        static async Task ManageOrders(LibraryFacade f)
+        static async Task ManageOrders(ILibraryFacade f)
         {
-            Console.WriteLine("1) View All 2) Delete");
+            Console.WriteLine("1) View All 2) View by id 3) View users 4)Delete");
             var opt = Console.ReadLine();
-            //TODO Реалізувати перегляд через f.GetAllOrdersAsync та видалення через f.DeleteOrderAsync
+            switch (opt)
+            {
+                case "1": await ViewAllOrders(f); break;
+                case "2": await ViewOrderById(f); break;
+                case "3": await ViewOrdersByUser(f); break;
+                case "4": await CancelOrder(f); break;
+                case "0": return;
+                default: Console.WriteLine("Invalid"); break;
+            }
         }
 
-        private static async Task ManageGenres(LibraryFacade f)
+        static async Task ViewAllOrders(ILibraryFacade f)
+        {
+            var allOrders = await f.ReadAllOrdersAsync();
+            if (!allOrders.Any())
+            {
+                Console.WriteLine("Немає жодного замовлення.\n");
+                return;
+            }
+
+            Console.WriteLine("=== All Orders ===");
+            foreach (var o in allOrders)
+            {
+                Console.WriteLine($"OrderId: {o.Id} | UserId: {o.UserId} | BookId: {o.BookId} | " +
+                                  $"OrderType: {o.OrderType} | BookCopyId: {o.BookCopyId} | Date: {o.OrderDate}");
+            }
+            Console.WriteLine();
+        }
+
+        static async Task ViewOrderById(ILibraryFacade f)
+        {
+            Console.Write("Enter OrderId: ");
+            if (!int.TryParse(Console.ReadLine(), out var orderId))
+            {
+                Console.WriteLine("Невірний формат OrderId.\n");
+                return;
+            }
+
+            try
+            {
+                var o = await f.ReadOrderByIdAsync(orderId);
+                Console.WriteLine("=== Order Details ===");
+                Console.WriteLine($"OrderId:   {o.Id}");
+                Console.WriteLine($"UserId:    {o.UserId}");
+                Console.WriteLine($"BookId:    {o.BookId}");
+                Console.WriteLine($"OrderType: {o.OrderType}");
+                Console.WriteLine($"BookCopyId:{o.BookCopyId}");
+                Console.WriteLine($"OrderDate: {o.OrderDate}");
+                Console.WriteLine("======================\n");
+            }
+            catch (KeyNotFoundException knf)
+            {
+                Console.WriteLine($"Помилка: {knf.Message}\n");
+            }
+        }
+
+        static async Task ViewOrdersByUser(ILibraryFacade f)
+        {
+            Console.Write("Enter UserId: ");
+            if (!int.TryParse(Console.ReadLine(), out var userId))
+            {
+                Console.WriteLine("Невірний формат UserId.\n");
+                return;
+            }
+
+            var orders = await f.ReadOrdersByUserAsync(userId);
+            if (!orders.Any())
+            {
+                Console.WriteLine($"Користувач з Id = {userId} не має замовлень.\n");
+                return;
+            }
+
+            Console.WriteLine($"=== Orders of UserId {userId} ===");
+            foreach (var o in orders)
+            {
+                Console.WriteLine($"OrderId: {o.Id} | BookId: {o.BookId} | " +
+                                  $"OrderType: {o.OrderType} | BookCopyId: {o.BookCopyId} | Date: {o.OrderDate}");
+            }
+            Console.WriteLine();
+        }
+
+        private static async Task ManageGenres(ILibraryFacade f)
         {
             Console.WriteLine("1) Create Genre 2) Update Genre 3) Delete Genre");
             var opt = Console.ReadLine();
@@ -530,14 +742,14 @@ namespace ConsoleLibraryApp
             Console.ReadKey();
         }
 
-        private static async Task CreateGenre(LibraryFacade f)
+        private static async Task CreateGenre(ILibraryFacade f)
         {
             Console.Write("Назва жанру: "); var name = Console.ReadLine();
             await f.CreateGenreAsync(new GenreDto { Name = name });
             Console.WriteLine("Жанр додано.");
         }
 
-        private static async Task UpdateGenre(LibraryFacade f)
+        private static async Task UpdateGenre(ILibraryFacade f)
         {
             var genres = await f.GetAllGenresAsync();
             foreach (var g in genres)
@@ -552,7 +764,7 @@ namespace ConsoleLibraryApp
             Console.WriteLine("Жанр оновлено.");
         }
 
-        private static async Task DeleteGenre(LibraryFacade f)
+        private static async Task DeleteGenre(ILibraryFacade f)
         {
             Console.Write("Genre ID: ");
             if (!int.TryParse(Console.ReadLine(), out int id)) { Console.WriteLine("Invalid ID"); return; }

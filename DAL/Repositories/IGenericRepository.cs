@@ -17,6 +17,8 @@ namespace DAL.Repositories
         void Update(TEntity entity);
         void Delete(TEntity entity);
         IQueryable<Book> ReadAll();
+        IQueryable<Order> ReadAllOrder();
+        IQueryable<User> ReadAllUser();
 
     }
 }

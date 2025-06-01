@@ -33,14 +33,6 @@ namespace API.Controllers
             return CreatedAtAction(nameof(GetById), new { id = dto.Id }, null);
         }
 
-        [HttpPut("{id:int}")]
-        public async Task<IActionResult> Update(int id, [FromBody] ActionOrderDto dto)
-        {
-            dto.Id = id;
-            await _svc.UpdateAsync(dto);
-            return NoContent();
-        }
-
         [HttpDelete("{id:int}")]
         public async Task<IActionResult> Delete(int id)
         {

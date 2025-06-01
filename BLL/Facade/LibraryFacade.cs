@@ -12,7 +12,7 @@ namespace BLL.Facade
     /// Фасад, який інкапсулює взаємодію з різними сервісами BLL
     /// та спрощує клієнтський код (ConsoleApp, Web API тощо).
     /// </summary>
-    public class LibraryFacade
+    public class LibraryFacade: ILibraryFacade
     {
         private readonly IBookService _bookService;
         private readonly IGenreService _genreService;
@@ -93,24 +93,20 @@ namespace BLL.Facade
 
         // Замовлення
         /// <summary>Повернути всі замовлення.</summary>
-        public Task<IEnumerable<OrderDto>> GetAllOrdersAsync() =>
+        public Task<IEnumerable<OrderDto>> ReadAllOrdersAsync() =>
             _orderService.ReadAllAsync();
 
         /// <summary>Повернути замовлення за ідентифікатором.</summary>
-        public Task<OrderDto> GetOrderByIdAsync(int id) =>
+        public Task<OrderDto> ReadOrderByIdAsync(int id) =>
             _orderService.ReadByIdAsync(id);
 
         /// <summary>Повернути замовлення користувача.</summary>
-        public Task<IEnumerable<OrderDto>> GetOrdersByUserAsync(int userId) =>
+        public Task<IEnumerable<OrderDto>> ReadOrdersByUserAsync(int userId) =>
             _orderService.ReadByUserAsync(userId);
 
         /// <summary>Створити нове замовлення.</summary>
         public Task CreateOrderAsync(ActionOrderDto dto) =>
             _orderService.CreateAsync(dto);
-
-        /// <summary>Оновити замовлення.</summary>
-        public Task UpdateOrderAsync(ActionOrderDto dto) =>
-            _orderService.UpdateAsync(dto);
 
         /// <summary>Видалити замовлення.</summary>
         public Task DeleteOrderAsync(int id) =>
@@ -138,5 +134,8 @@ namespace BLL.Facade
 
         public Task<List<BookTypeDto>> GetAllBookTypesAsync()
         => _bookTypeService.GetAllBookTypesAsync();
+
+        public async Task UpdateUserAsync(UserDto dto)
+            => await _userService.UpdateUserAsync(dto);
     }
 }

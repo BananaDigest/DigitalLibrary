@@ -55,6 +55,14 @@ namespace DAL.Repositories
         {
             return _context.Set<Book>();
         }
+        public IQueryable<Order> ReadAllOrder()
+        {
+            return _context.Set<Order>();
+        }
+        public IQueryable<User> ReadAllUser()
+        {
+            return _context.Set<User>();
+        }
 
     }
 }
