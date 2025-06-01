@@ -12,6 +12,7 @@ namespace BLL.DTOs
         public List<int> AvailableTypeIds { get; set; } = new();
         public int GenreId { get; set; }
         public GenreDto Genre { get; set; }
+        public string Description { get; set; }
 
         // Додайте ці нові властивості
         public int AvailableCopies { get; set; }  // Доступні паперові копії

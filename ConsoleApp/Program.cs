@@ -447,6 +447,8 @@ namespace ConsoleLibraryApp
                         return;
                     }
                 }
+                Console.Write("Enter Description: ");
+                var description = Console.ReadLine()?.Trim();
 
                 // Формуємо DTO
                 var dto = new ActionBookDto
@@ -457,7 +459,8 @@ namespace ConsoleLibraryApp
                     PublicationYear = year,
                     GenreId = genreId,
                     AvailableTypeIds = typeIds,
-                    CopyCount = copyCount
+                    CopyCount = copyCount,
+                    Description = description
                 };
 
                 // Створюємо книгу через фасад
@@ -476,6 +479,7 @@ namespace ConsoleLibraryApp
                 Console.WriteLine($"PublicationYear: {lastBook.PublicationYear}");
                 Console.WriteLine($"InitialAvailableCopies: {lastBook.InitialCopies}");
                 Console.WriteLine($"AvailableTypeIds: {string.Join(", ", lastBook.AvailableTypeIds)}");
+                Console.WriteLine($"Current Description: {lastBook.Description}");
                 Console.WriteLine("====================\n");
             }
             catch (Exception ex)
@@ -493,7 +497,8 @@ namespace ConsoleLibraryApp
                 Console.WriteLine(
                     $"{b.Id} | {b.Title} | {b.Author} | {b.Publisher} | " +
                     $"InitCopies: {b.InitialCopies} | " +
-                    $"Types: {string.Join(", ", b.AvailableTypeIds)}"
+                    $"Types: {string.Join(", ", b.AvailableTypeIds)} | " +
+                    $"Description: {b.Description}"
                 );
             }
             Console.WriteLine();
@@ -522,6 +527,7 @@ namespace ConsoleLibraryApp
                 Console.WriteLine($"Current GenreId: {existing.GenreId}");
                 Console.WriteLine($"Current InitialAvailableCopies: {existing.InitialCopies}");
                 Console.WriteLine($"Current AvailableTypeIds: {string.Join(", ", existing.AvailableTypeIds)}");
+                Console.WriteLine($"Current Description: {existing.Description}");
                 Console.WriteLine("-------------------------------------------------------");
 
                 // Вводимо нові дані
@@ -575,6 +581,9 @@ namespace ConsoleLibraryApp
                     }
                 }
 
+                Console.Write("Enter Description: ");
+                var description=Console.ReadLine();
+
                 var dto = new ActionBookDto
                 {
                     Title = title,
@@ -583,7 +592,8 @@ namespace ConsoleLibraryApp
                     PublicationYear = year,
                     GenreId = genreId,
                     AvailableTypeIds = typeIds,
-                    CopyCount = copyCount  // саме це попадатиме в InitialAvailableCopies
+                    CopyCount = copyCount,  // саме це попадатиме в InitialAvailableCopies
+                    Description = description
                 };
 
                 await f.UpdateBookAsync(bookId, dto);
@@ -598,6 +608,7 @@ namespace ConsoleLibraryApp
                 Console.WriteLine($"PublicationYear: {updated.PublicationYear}");
                 Console.WriteLine($"InitialAvailableCopies: {updated.InitialCopies}");
                 Console.WriteLine($"AvailableTypeIds: {string.Join(", ", updated.AvailableTypeIds)}");
+                Console.WriteLine($"Description: {existing.Description}");
                 Console.WriteLine("====================\n");
             }
             catch (KeyNotFoundException knf)

@@ -17,5 +17,6 @@ namespace BLL.DTOs
         public int Id { get; set; }
         public List<int> AvailableTypeIds { get; set; } = new();
         public int CopyCount { get; set; } = 0;
+        public string Description { get; set; }
     }
 }

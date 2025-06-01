@@ -138,6 +138,7 @@ namespace BLL.Services
             bookEntity.InitialCopies = dto.CopyCount;
 
             bookEntity.AvailableCopies = dto.CopyCount;
+            bookEntity.Description = dto.Description;
 
             // 5) Оновлюємо AvailableTypes (як раніше)
             var toRemove = bookEntity.AvailableTypes
