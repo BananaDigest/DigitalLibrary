@@ -1,4 +1,5 @@
-﻿using BLL.Interfaces;
+﻿using BLL.Facade;
+using BLL.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -7,26 +8,20 @@ namespace API.Controllers
 {
     [ApiController]
     [Route("api/reports")]
-    [Authorize(Roles = "Manager")]
+    [Authorize(Roles = "Manager,Administrator")]
     public class ReportsController : ControllerBase
     {
-        private readonly IBookService _bookSvc;
-        private readonly IOrderService _orderSvc;
+        private readonly ILibraryFacade _facade;
 
-        public ReportsController(IBookService bookSvc, IOrderService orderSvc)
+        public ReportsController(ILibraryFacade facade)
         {
-            _bookSvc = bookSvc;
-            _orderSvc = orderSvc;
+            _facade = facade;
         }
 
-        /// <summary>
-        /// Скільки паперових примірників кожної книги доступні зараз
-        /// </summary>
         [HttpGet("paper-availability")]
         public async Task<IActionResult> GetPaperAvailability()
         {
-            //  в BookDto нема полів: AvailableCopies, InitialCopies
-            var books = await _bookSvc.ReadAllAsync();
+            var books = await _facade.GetAllBooksAsync();
             var report = books.Select(b => new
             {
                 b.Id,
@@ -37,14 +32,10 @@ namespace API.Controllers
             return Ok(report);
         }
 
-        /// <summary>
-        /// Скільки паперових книг замовлено користувачами
-        /// </summary>
         [HttpGet("paper-orders")]
         public async Task<IActionResult> GetPaperOrdersReport()
         {
-            var orders = await _orderSvc.ReadAllAsync();
-            // Фільтруємо тільки замовлення паперових копій
+            var orders = await _facade.ReadAllOrdersAsync();
             var paperOrders = orders
                 .Where(o => o.OrderType == Domain.Enums.BookType.Paper)
                 .GroupBy(o => o.BookId)
@@ -56,19 +47,16 @@ namespace API.Controllers
             return Ok(paperOrders);
         }
 
-        /// <summary>
-        /// Скільки разів завантажували електронні та прослуховували аудіо
-        /// </summary>
         [HttpGet("digital-metrics")]
         public async Task<IActionResult> GetDigitalMetrics()
         {
-            var books = await _bookSvc.ReadAllAsync();
+            var books = await _facade.GetAllBooksAsync();
             var metrics = books.Select(b => new
             {
                 b.Id,
                 b.Title,
-                ElectronicDownloads = b.DownloadCount,   // зі CreateBookDto/BookDto має бути поле DownloadCount
-                AudioPlays = b.ListenCount      // і поле ListenCount
+                ElectronicDownloads = b.DownloadCount,
+                AudioPlays = b.ListenCount
             });
             return Ok(metrics);
         }

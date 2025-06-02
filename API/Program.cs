@@ -11,63 +11,77 @@ using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using BLL.Mapping;
 using BLL.Factory;
+using API.DependencyInjection;
+using Autofac.Extensions.DependencyInjection;
+using Autofac;
+using Microsoft.Extensions.Configuration;
+using Microsoft.AspNetCore.Authentication.Cookies;
 
 var builder = WebApplication.CreateBuilder(args);
+var configuration = builder.Configuration;
 
-// 1. DbContext та UnitOfWork
-builder.Services.AddDbContext<DigitalLibraryContext>(opt =>
-    opt.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
-builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
+// 1. Видаляємо JWT-налаштування повністю.
 
-// 2. AutoMapper
-builder.Services.AddAutoMapper(typeof(AutoMapperProfiles).Assembly);
-
-// 3. BLL-сервіси
-builder.Services.AddScoped<IBookService, BookService>();
-builder.Services.AddScoped<IBookFactory, BookFactory>();
-builder.Services.AddScoped<IGenreService, GenreService>();
-builder.Services.AddScoped<IUserService, UserService>();
-builder.Services.AddScoped<IOrderService, OrderService>();
-
-// 4. JWT-аутентифікація
-builder.Services
-    .AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-    .AddJwtBearer(opt =>
+// 2. Налаштовуємо Autofac (як було раніше)…
+builder.Host
+    .UseServiceProviderFactory(new AutofacServiceProviderFactory())
+    .ConfigureContainer<ContainerBuilder>(containerBuilder =>
     {
-        opt.TokenValidationParameters = new TokenValidationParameters
-        {
-            ValidateIssuer = true,
-            ValidateAudience = true,
-            ValidateLifetime = true,
-            ValidateIssuerSigningKey = true,
-            ValidIssuer = builder.Configuration["Jwt:Issuer"],
-            ValidAudience = builder.Configuration["Jwt:Audience"],
-            IssuerSigningKey = new SymmetricSecurityKey(
-                                          Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"]))
-        };
+        containerBuilder.RegisterModule(new DependencyModule(configuration));
     });
 
-// 5. Controllers only (Web API)
+// 3. Додаємо служби ASP.NET Core (Controllers, CORS, Swagger тощо)…
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowAll", policy =>
+    {
+        policy.AllowAnyOrigin()
+              .AllowAnyHeader()
+              .AllowAnyMethod();
+    });
+});
+
 builder.Services.AddControllers(options =>
 {
-    // глобальний фільтр обробки виключень
     options.Filters.Add<ExceptionFilter>();
 });
 
-// 6. Swagger для API-документації
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
+// 4. Додаємо Cookie-аутентифікацію замість JWT:
+builder.Services
+    .AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
+    .AddCookie(options =>
+    {
+        // Шлях до сторінки логіну (якщо потрібна перенаправка):
+        options.LoginPath = "/api/auth/login";
+        // Якщо хочете власну сторінку помилки 403:
+        options.AccessDeniedPath = "/api/auth/denied";
+        // Можна налаштувати час дії кукі:
+        options.ExpireTimeSpan = TimeSpan.FromHours(2);
+        options.SlidingExpiration = true;
+    });
+
+// 5. Реєструємо AutoMapper (як було раніше):
+builder.Services.AddAutoMapper(typeof(API.Mapping.AutoMapperProfiles).Assembly);
+
 var app = builder.Build();
 
-app.UseSwagger();
-app.UseSwaggerUI();
+// 6. Middleware
+if (app.Environment.IsDevelopment())
+{
+    app.UseDeveloperExceptionPage();
+    app.UseSwagger();
+    app.UseSwaggerUI();
+}
 
-// порядок важливий!
+app.UseCors("AllowAll");
+
+// Додаємо аутентифікацію/авторизацію
 app.UseAuthentication();
 app.UseAuthorization();
 
-// мапимо тільки API-контролери
 app.MapControllers();
 
 app.Run();
