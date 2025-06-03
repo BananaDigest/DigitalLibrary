@@ -11,6 +11,8 @@ using Microsoft.EntityFrameworkCore;
 using AutoMapper;
 using BLL.Factory;
 using BLL.Strategy;
+using API.Mapping;
+using BLL.Mapping;
 
 namespace API.DependencyInjection
 {
@@ -26,7 +28,7 @@ namespace API.DependencyInjection
         protected override void Load(ContainerBuilder builder)
         {
             // 1. DbContext
-            builder.Register(context =>
+            builder.Register(ctx =>
             {
                 var options = new DbContextOptionsBuilder<DigitalLibraryContext>()
                     .UseSqlServer(_configuration.GetConnectionString("DefaultConnection"))
@@ -41,7 +43,7 @@ namespace API.DependencyInjection
                    .As<IUnitOfWork>()
                    .InstancePerLifetimeScope();
 
-            // 3. BLL-сервіси
+            // 3. BLL‐сервіси
             builder.RegisterType<BookService>()
                    .As<IBookService>()
                    .InstancePerLifetimeScope();
@@ -83,19 +85,26 @@ namespace API.DependencyInjection
                    .As<ILibraryFacade>()
                    .InstancePerLifetimeScope();
 
-            // 8. AutoMapper
-            builder.Register(context => new MapperConfiguration(cfg =>
+            // 8. AutoMapper: додаємо всі профілі із двох збірок
+            builder.Register(context =>
             {
-                cfg.AddProfile<API.Mapping.AutoMapperProfiles>();
-                cfg.AddProfile<BLL.Mapping.AutoMapperProfiles>();
-            }))
+                var cfg = new MapperConfiguration(cfg =>
+                {
+                    // скануємо всю збірку API.Mapping
+                    cfg.AddMaps(typeof(UserMappingProfile).Assembly);
+                    // скануємо всю збірку BLL.Mapping
+                    cfg.AddMaps(typeof(UserDtoMappingProfile).Assembly);
+                });
+                return cfg;
+            })
             .AsSelf()
             .SingleInstance();
 
             builder.Register(c =>
             {
-                var config = c.Resolve<MapperConfiguration>();
-                return config.CreateMapper(c.Resolve);
+                var ctx = c.Resolve<IComponentContext>();
+                var config = ctx.Resolve<MapperConfiguration>();
+                return config.CreateMapper(ctx.Resolve);
             })
             .As<IMapper>()
             .InstancePerLifetimeScope();
