@@ -113,6 +113,19 @@ namespace BLL.Mapping
                            opt => opt.MapFrom(src => src.BookCopyId))
                 // Дату будемо встановлювати напряму в сервісі:
                 .ForMember(dest => dest.OrderDate, opt => opt.Ignore());
+
+            //
+            // === Genre ↔ GenreDto ===
+            //
+            CreateMap<Genre, GenreDto>()
+                .ForMember(dest => dest.Id, opt => opt.MapFrom(src => src.Id))
+                .ForMember(dest => dest.Name, opt => opt.MapFrom(src => src.Name));
+
+            CreateMap<GenreDto, Genre>()
+                .ForMember(dest => dest.Id, opt => opt.MapFrom(src => src.Id))
+                .ForMember(dest => dest.Name, opt => opt.MapFrom(src => src.Name));
+
+
         }
     }
 }

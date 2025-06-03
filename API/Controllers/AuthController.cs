@@ -88,12 +88,18 @@ namespace API.Controllers
 
         // ==================== Отримати дані про користувача ====================
         [HttpGet("{id:int}")]
-        [Authorize(Roles = "Manager,Administrator")]
+        [Authorize(Roles = "Manager,Administrator,Registered")]
         public async Task<IActionResult> GetById(int id)
         {
             var userDto = await _facade.GetUserByIdAsync(id);
             if (userDto == null)
                 return NotFound();
+
+            var currentUserId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value);
+            var currentRole = User.FindFirst(ClaimTypes.Role)?.Value;
+
+            if (currentRole != "Administrator" && currentRole != "Manager" && currentUserId != id)
+                return Forbid(); // 403
 
             var result = _mapper.Map<UserViewModel>(userDto);
             return Ok(result);
@@ -101,11 +107,16 @@ namespace API.Controllers
 
         // ==================== Оновлення даних користувача ====================
         [HttpPut("{id:int}")]
-        [Authorize(Roles = "Manager,Administrator")]
+        [Authorize(Roles = "Manager,Administrator,Registered")]
         public async Task<IActionResult> Update(int id, [FromBody] UserActionModel model)
         {
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
+            var currentUserId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value);
+            var currentRole = User.FindFirst(ClaimTypes.Role)?.Value;
+
+            if (currentRole != "Administrator" && currentRole != "Manager" && currentUserId != id)
+                return Forbid(); // 403
 
             var dto = _mapper.Map<UserDto>(model);
             dto.Id = id;
@@ -115,9 +126,14 @@ namespace API.Controllers
 
         // ==================== Видалення користувача ====================
         [HttpDelete("{id:int}")]
-        [Authorize(Roles = "Administrator")]
+        [Authorize(Roles = "Administrator, Registered")]
         public async Task<IActionResult> Delete(int id)
         {
+            var currentUserId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value);
+            var currentRole = User.FindFirst(ClaimTypes.Role)?.Value;
+
+            if (currentRole != "Administrator" && currentUserId != id)
+                return Forbid(); // 403
             await _facade.DeleteUserAsync(id);
             return NoContent();
         }

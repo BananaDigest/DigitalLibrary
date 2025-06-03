@@ -65,6 +65,12 @@ builder.Services
 
 // 5. Реєструємо AutoMapper (як було раніше):
 builder.Services.AddAutoMapper(typeof(API.Mapping.AutoMapperProfiles).Assembly);
+builder.Services.AddAutoMapper(typeof(AutoMapperProfiles).Assembly);
+
+builder.Services.AddAutoMapper(
+    typeof(BLL.Mapping.AutoMapperProfiles).Assembly,
+    typeof(API.Mapping.AutoMapperProfiles).Assembly
+);
 
 var app = builder.Build();
 
@@ -74,6 +80,7 @@ if (app.Environment.IsDevelopment())
     app.UseDeveloperExceptionPage();
     app.UseSwagger();
     app.UseSwaggerUI();
+    app.MapGet("/", () => Results.Redirect("/swagger/index.html", false));
 }
 
 app.UseCors("AllowAll");

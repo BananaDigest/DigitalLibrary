@@ -87,6 +87,7 @@ namespace API.DependencyInjection
             builder.Register(context => new MapperConfiguration(cfg =>
             {
                 cfg.AddProfile<API.Mapping.AutoMapperProfiles>();
+                cfg.AddProfile<BLL.Mapping.AutoMapperProfiles>();
             }))
             .AsSelf()
             .SingleInstance();

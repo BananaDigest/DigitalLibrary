@@ -32,7 +32,7 @@ namespace API.Controllers
         }
 
         [HttpPost]
-        [Authorize(Roles = "Manager,Administrator")]
+        [Authorize(Roles = "Manager")]
         public async Task<IActionResult> Create([FromBody] CreateBookModel model)
         {
             if (!ModelState.IsValid)
@@ -44,7 +44,7 @@ namespace API.Controllers
         }
 
         [HttpPut("{id:int}")]
-        [Authorize(Roles = "Manager,Administrator")]
+        [Authorize(Roles = "Manager")]
         public async Task<IActionResult> Update(int id, [FromBody] CreateBookModel model)
         {
             if (!ModelState.IsValid)
@@ -57,7 +57,7 @@ namespace API.Controllers
         }
 
         [HttpDelete("{id:int}")]
-        [Authorize(Roles = "Administrator")]
+        [Authorize(Roles = "Manager")]
         public async Task<IActionResult> Delete(int id)
         {
             await _facade.DeleteBookAsync(id);
