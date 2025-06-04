@@ -28,8 +28,8 @@ namespace BLL.Services
 
         public async Task<IEnumerable<BookDto>> ReadAllAsync()
         {
-            var entities = await _uow.Books.ReadAllAsync();
-            return _mapper.Map<IEnumerable<BookDto>>(entities);
+            var books = await _uow.Books.ReadAllAsync();
+            return _mapper.Map<IEnumerable<BookDto>>(books);
         }
 
         public async Task<BookDto> ReadByIdAsync(int id)
