@@ -28,8 +28,21 @@ namespace DAL.Repositories
 
         public async Task<IEnumerable<TEntity>> ReadAllAsync()
         {
+            if (typeof(TEntity) == typeof(Book))
+            {
+                return (IEnumerable<TEntity>)await _context.Books
+                    .Include(b => b.Genre)
+                    .ToListAsync();
+            }
+
             return await _dbSet.ToListAsync();
         }
+
+
+        //public async Task<IEnumerable<TEntity>> ReadAllAsync()
+        //{
+        //    return await _dbSet.ToListAsync();
+        //}
 
         public async Task<IEnumerable<TEntity>> FindAsync(Expression<Func<TEntity, bool>> predicate)
         {
