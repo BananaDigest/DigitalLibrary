@@ -9,8 +9,8 @@ using Microsoft.AspNetCore.Authentication.Cookies;
 
 var builder = WebApplication.CreateBuilder(args);
 
-string basePath = AppContext.BaseDirectory;
-string appDataPath = Path.Combine(basePath, "App_Data");
+var contentRoot = builder.Environment.ContentRootPath;
+var appDataPath = Path.Combine(contentRoot, "App_Data");
 if (!Directory.Exists(appDataPath))
     Directory.CreateDirectory(appDataPath);
 AppDomain.CurrentDomain.SetData("DataDirectory", appDataPath);

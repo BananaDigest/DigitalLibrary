@@ -28,7 +28,6 @@ x86/
 [Aa][Rr][Mm]64/
 bld/
 [Bb]in/
-!API/bin/Debug/net8.0/App_Data/
 [Oo]bj/
 [Oo]ut/
 [Ll]og/
@@ -266,6 +265,8 @@ ServiceFabricBackup/
 *.mdf
 *.ldf
 *.ndf
+!API/App_Data/*.mdf
+!API/App_Data/*.ldf
 
 # Business Intelligence projects
 *.rdl.data
