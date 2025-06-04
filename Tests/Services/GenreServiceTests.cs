@@ -205,5 +205,96 @@ namespace Tests.Services
             await genreRepoMock.Received(1).CreateAsync(Arg.Is<Genre>(g => g.Id == 5 && g.Name == "Horror"));
             await uowMock.Received(1).CommitAsync();
         }
+
+        [Test]
+        public async Task UpdateAsync_ExistingGenre_UpdatesEntityAndCommits()
+        {
+            // Arrange
+            var uowMock = _container.Resolve<IUnitOfWork>();
+            var genreRepoMock = uowMock.Genres;
+
+            // Отримаємо сервіс
+            var service = _container.Resolve<IGenreService>();
+
+            // Готуюмо новий DTO для оновлення існуючого жанру (id=1)
+            var updateDto = new GenreDto { Id = 1, Name = "Sci-Fi" };
+
+            // Act
+            await service.UpdateAsync(updateDto);
+
+            // Assert
+            // 1) Перевіряємо, що IMapper.Map(dto, existing) було викликано
+            var mapperMock = _container.Resolve<AutoMapper.IMapper>();
+            mapperMock.Received(1).Map(Arg.Is<GenreDto>(d => d.Id == 1 && d.Name == "Sci-Fi"),
+                                      Arg.Any<Genre>());
+
+            // 2) Перевіряємо, що Update(...) було викликано з сутністю, у якої Id == 1
+            genreRepoMock.Received(1).Update(Arg.Is<Genre>(g => g.Id == 1));
+
+            // 3) Перевіряємо, що CommitAsync() викликався
+            await uowMock.Received(1).CommitAsync();
+        }
+
+
+        [Test]
+        public void UpdateAsync_NonExistingGenre_ThrowsKeyNotFoundException()
+        {
+            // Arrange
+            var uowMock = _container.Resolve<IUnitOfWork>();
+            // Налаштуємо, що ReadByIdAsync для id = 999 повертає null
+            var genreRepoMock = uowMock.Genres;
+            genreRepoMock.ReadByIdAsync(999).Returns(Task.FromResult<Genre>(null));
+
+            var mapperMock = _container.Resolve<AutoMapper.IMapper>();
+            var service = _container.Resolve<IGenreService>();
+
+            var nonExistingDto = new GenreDto { Id = 999, Name = "NonExistent" };
+
+            // Act & Assert
+            Assert.ThrowsAsync<KeyNotFoundException>(
+                async () => await service.UpdateAsync(nonExistingDto),
+                "Якщо жанр не знайдено (ReadByIdAsync повертає null), маємо отримати KeyNotFoundException"
+            );
+        }
+
+        [Test]
+        public async Task DeleteAsync_ExistingGenre_DeletesEntityAndCommits()
+        {
+            // Arrange
+            var uowMock = _container.Resolve<IUnitOfWork>();
+            var genreRepoMock = uowMock.Genres;
+
+            // Сервіс
+            var service = _container.Resolve<IGenreService>();
+
+            // Дія (для id = 1, який існує завдяки налаштуванню ReadByIdAsync у SetUp)
+            await service.DeleteAsync(1);
+
+            // Assert
+            // 1) Перевіряємо, що Delete(...) викликано для сутності з Id == 1
+            genreRepoMock.Received(1).Delete(Arg.Is<Genre>(g => g.Id == 1));
+
+            // 2) Перевіряємо, що CommitAsync() викликано
+            await uowMock.Received(1).CommitAsync();
+        }
+
+        [Test]
+        public void DeleteAsync_NonExistingGenre_ThrowsKeyNotFoundException()
+        {
+            // Arrange
+            var uowMock = _container.Resolve<IUnitOfWork>();
+            var genreRepoMock = uowMock.Genres;
+
+            // Переналаштовуємо: ReadByIdAsync(999) повертає null
+            genreRepoMock.ReadByIdAsync(999).Returns(Task.FromResult<Genre>(null));
+
+            var service = _container.Resolve<IGenreService>();
+
+            // Act & Assert
+            Assert.ThrowsAsync<KeyNotFoundException>(
+                async () => await service.DeleteAsync(999),
+                "Якщо жанр не знайдено, DeleteAsync має кидати KeyNotFoundException"
+            );
+        }
     }
 }
