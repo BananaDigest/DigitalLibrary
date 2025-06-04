@@ -38,6 +38,7 @@ namespace BLL.Services
                 .ReadAll()                           // IQueryable<Book>
                 .Include(b => b.AvailableTypes)     // підвантажуємо join-колекцію
                 .Include(b => b.Copies)             // підвантажуємо копії
+                .Include(b => b.Genre)
                 .FirstOrDefaultAsync(b => b.Id == id);
 
             if (bookEntity == null)
