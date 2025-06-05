@@ -14,6 +14,7 @@ using Domain.Enums;
 using Domain.Entities;
 using Microsoft.EntityFrameworkCore.Query;
 using System.Linq.Expressions;
+using FluentAssertions;
 
 
 namespace Tests.Services
@@ -335,9 +336,12 @@ namespace Tests.Services
                 LastName = "Last"
             };
 
-            // Використовуємо TestAsyncEnumerable для IQueryable<User>
-            var asyncUsers = new TestAsyncEnumerable<User>(new[] { originalUser });
-            _uowMock.Users.ReadAllUser().Returns(asyncUsers);
+            // Додаємо користувача в InMemory‐контекст
+            _inMemoryContext.Users.Add(originalUser);
+            _inMemoryContext.SaveChanges();
+
+            // Налаштовуємо репозиторій так, щоб ReadAllUser() повертав "живий" DbSet<User>
+            _uowMock.Users.ReadAllUser().Returns(_inMemoryContext.Users);
 
             // DTO із новими значеннями
             var dto = new UserDto
@@ -348,6 +352,7 @@ namespace Tests.Services
                 Role = UserRole.Registered.ToString()
             };
 
+            // AutoMapper.Map(dto, originalUser) просто переписує поля
             _mapperMock
                 .When(m => m.Map(dto, originalUser))
                 .Do(call =>
@@ -362,6 +367,7 @@ namespace Tests.Services
             // ASSERT
             Assert.That(originalUser.Email, Is.EqualTo("new@example.com"));
             Assert.That(originalUser.Password, Is.EqualTo("newpass"));
+
             _uowMock.Users.Received(1).Update(originalUser);
             await _uowMock.Received(1).CommitAsync();
         }
@@ -371,8 +377,9 @@ namespace Tests.Services
         {
             // ARRANGE
             var missingId = 99;
-            var asyncEmpty = new TestAsyncEnumerable<User>(Array.Empty<User>());
-            _uowMock.Users.ReadAllUser().Returns(asyncEmpty);
+            // Не додаємо жодного користувача в InMemoryContext → Users порожня
+            // Налаштовуємо ReadAllUser() повернути саме DbSet<User> (порожній)
+            _uowMock.Users.ReadAllUser().Returns(_inMemoryContext.Users);
 
             var dto = new UserDto
             {
@@ -386,15 +393,112 @@ namespace Tests.Services
             var ex = Assert.ThrowsAsync<KeyNotFoundException>(
                 async () => await _service.UpdateUserAsync(dto));
             Assert.That(ex.Message, Is.EqualTo($"User with Id = {missingId} not found."));
+
             _uowMock.Users.DidNotReceive().Update(Arg.Any<User>());
             _uowMock.DidNotReceive().CommitAsync();
         }
 
+        [Test]
+        public async Task ReadAllUsersAsync_WithExistingUsers_ReturnsDtosWithPasswordNull()
+        {
+            // ARRANGE
+            // Готуємо список доменних користувачів
+            var domainUsers = new List<User>
+            {
+                new User
+                {
+                    Id = 1,
+                    Email = "a@example.com",
+                    Password = "pass1",
+                    Role = UserRole.Registered,
+                    FirstName = "Alice",
+                    LastName = "Anderson"
+                },
+                new User
+                {
+                    Id = 2,
+                    Email = "b@example.com",
+                    Password = "pass2",
+                    Role = UserRole.Manager,
+                    FirstName = "Bob",
+                    LastName = "Brown"
+                }
+            };
 
-        // -------------------------------------------
-        // Реалізація TestAsyncEnumerable та TestAsyncQueryProvider
-        // -------------------------------------------
-        internal class TestAsyncEnumerable<T> : EnumerableQuery<T>, IAsyncEnumerable<T>, IQueryable<T>
+            // Налаштовуємо ReadAllAsync() репозиторію повернути цей список
+            _uowMock.Users
+                .ReadAllAsync()
+                .Returns(Task.FromResult<IEnumerable<User>>(domainUsers));
+
+            // Налаштовуємо AutoMapper так, щоб він перетворював User → UserDto
+            _mapperMock
+                .Map<List<UserDto>>(Arg.Any<List<User>>())
+                .Returns(call =>
+                {
+                    var sourceList = call.Arg<List<User>>();
+                    // Прив’язуємо пропорційно
+                    return sourceList.Select(u => new UserDto
+                    {
+                        Id = u.Id,
+                        Email = u.Email,
+                        FirstName = u.FirstName,
+                        LastName = u.LastName,
+                        Role = u.Role.ToString(),
+                        // передамо пароль з домену, цей тест перевірятиме, що сервіс потім його обнуляє
+                        Password = u.Password
+                    }).ToList();
+                });
+
+            // ACT
+            var result = (await _service.ReadAllUsersAsync()).ToList();
+
+            // ASSERT
+            result.Should().HaveCount(2);
+
+            // Перевіряємо перший DTO
+            result[0].Id.Should().Be(1);
+            result[0].Email.Should().Be("a@example.com");
+            result[0].FirstName.Should().Be("Alice");
+            result[0].LastName.Should().Be("Anderson");
+            result[0].Role.Should().Be(UserRole.Registered.ToString());
+            result[0].Password.Should().BeNull("бо метод має обнулити пароль");
+
+            // Перевіряємо другий DTO
+            result[1].Id.Should().Be(2);
+            result[1].Email.Should().Be("b@example.com");
+            result[1].FirstName.Should().Be("Bob");
+            result[1].LastName.Should().Be("Brown");
+            result[1].Role.Should().Be(UserRole.Manager.ToString());
+            result[1].Password.Should().BeNull("бо метод має обнулити пароль");
+        }
+
+        [Test]
+        public async Task ReadAllUsersAsync_WhenNoUsers_ReturnsEmptyList()
+        {
+            // ARRANGE
+            var emptyList = new List<User>();
+            _uowMock.Users
+                .ReadAllAsync()
+                .Returns(Task.FromResult<IEnumerable<User>>(emptyList));
+
+            // Навіть якщо AutoMapper було б налаштовано – сюди воно не потрапить,
+            // бо список порожній
+            _mapperMock
+                .Map<List<UserDto>>(Arg.Any<List<User>>())
+                .Returns(new List<UserDto>());
+
+            // ACT
+            var result = (await _service.ReadAllUsersAsync()).ToList();
+
+            // ASSERT
+            result.Should().BeEmpty("тому що в репозиторії немає користувачів");
+        }
+
+
+    // -------------------------------------------
+    // Реалізація TestAsyncEnumerable та TestAsyncQueryProvider
+    // -------------------------------------------
+    internal class TestAsyncEnumerable<T> : EnumerableQuery<T>, IAsyncEnumerable<T>, IQueryable<T>
         {
             public TestAsyncEnumerable(IEnumerable<T> enumerable) : base(enumerable) { }
             public TestAsyncEnumerable(Expression expression) : base(expression) { }
