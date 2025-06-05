@@ -60,7 +60,7 @@ namespace API.Controllers
                 new ClaimsPrincipal(claimsIdentity),
                 authProperties);
 
-            return Ok(new { message = "Успішний вхід." });
+            return Ok(new { message = "Успішний вхід.", token = "qwerty" });
         }
 
         // ==================== Logout ====================
@@ -105,14 +105,51 @@ namespace API.Controllers
             return Ok(result);
         }
 
-        [HttpGet("get all users without password")]
-        [Authorize(Roles = "Manager,Administrator")]
+        //[HttpGet("get-all-users")]
+        //[Authorize(Roles = "Manager,Administrator, Registered")]
+        //public async Task<IActionResult> ReadAll()
+        //{
+        //    var users = await _facade.ReadAllUsersAsync();
+        //    // Передамо у ViewModel (якщо потрібна додаткова фільтрація) або просто повернемо як є:
+        //    return Ok(users);
+        //}
+        [HttpGet("get-all-users")]
         public async Task<IActionResult> ReadAll()
         {
-            var users = await _facade.ReadAllUsersAsync();
-            // Передамо у ViewModel (якщо потрібна додаткова фільтрація) або просто повернемо як є:
-            return Ok(users);
+            // Перевірка, чи користувач аутентифікований і має одну з потрібних ролей
+            if (User.Identity.IsAuthenticated)
+            {
+                var roles = User.Claims.Where(c => c.Type == ClaimTypes.Role).Select(c => c.Value);
+                if (roles.Contains("Manager") || roles.Contains("Administrator") || roles.Contains("Registered"))
+                {
+                    var users = await _facade.ReadAllUsersAsync();
+                    return Ok(users);
+                }
+                else
+                {
+                    return Forbid();
+                }
+            }
+
+            // Якщо користувач не аутентифікований, перевіряємо Bearer токен
+            var authHeader = Request.Headers["Authorization"].ToString();
+
+            if (string.IsNullOrEmpty(authHeader) || !authHeader.StartsWith("Bearer "))
+            {
+                return Unauthorized(new { message = "Відсутній або неправильний токен авторизації" });
+            }
+
+            var token = authHeader.Substring("Bearer ".Length).Trim();
+
+            if (token != "qwerty")
+            {
+                return Unauthorized(new { message = "Невірний токен" });
+            }
+
+            var usersByToken = await _facade.ReadAllUsersAsync();
+            return Ok(usersByToken);
         }
+
 
         // ==================== Оновлення даних користувача ====================
         [HttpPut("{id:int}")]
