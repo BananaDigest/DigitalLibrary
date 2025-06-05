@@ -9,17 +9,14 @@ namespace BLL.Facade
 {
     public interface ILibraryFacade
     {
-        public Task<IEnumerable<BookDto>> GetAllBooksAsync();
-        public Task<BookDto> GetBookByIdAsync(int id);
-        public Task<IEnumerable<BookDto>> SearchBooksAsync(string term);
-        public Task<IEnumerable<BookDto>> FilterBooksByTypeAsync(int typeId);
-        public Task<IEnumerable<BookDto>> FilterBooksByGenreAsync(int genreId);
+        public Task<IEnumerable<BookDto>> ReadAllBooksAsync();
+        public Task<BookDto> ReadBookByIdAsync(int id);
         public Task CreateBookAsync(ActionBookDto dto);
         public Task UpdateBookAsync(int bookId, ActionBookDto dto);
         public Task<List<BookDto>> ReadBooksByTypeAsync(int typeId);
         public Task DeleteBookAsync(int id);
-        public Task<IEnumerable<GenreDto>> GetAllGenresAsync();
-        public Task<GenreDto> GetGenreByIdAsync(int id);
+        public Task<IEnumerable<GenreDto>> ReadAllGenresAsync();
+        public Task<GenreDto> ReadGenreByIdAsync(int id);
         public Task CreateGenreAsync(GenreDto dto);
         public Task UpdateGenreAsync(GenreDto dto);
         public Task DeleteGenreAsync(int id);
@@ -29,10 +26,10 @@ namespace BLL.Facade
         public Task CreateOrderAsync(ActionOrderDto dto);
         public Task DeleteOrderAsync(int id);
         public Task<UserDto> RegisterUserAsync(UserDto dto);
-        public Task<UserDto> GetUserByIdAsync(int id);
+        public Task<UserDto> ReadUserByIdAsync(int id);
         public Task<UserDto> AuthenticateAsync(string email, string password);
         public Task DeleteUserAsync(int id);
-        public Task<List<BookTypeDto>> GetAllBookTypesAsync();
+        public Task<List<BookTypeDto>> ReadAllBookTypesAsync();
         public Task UpdateUserAsync(UserDto dto);
 
     }

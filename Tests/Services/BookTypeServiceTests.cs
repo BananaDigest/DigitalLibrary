@@ -79,13 +79,13 @@ namespace Tests.Services
         }
 
         [Test]
-        public async Task GetAllBookTypesAsync_Returns_All_BookTypeDtos()
+        public async Task ReadAllBookTypesAsync_Returns_All_BookTypeDtos()
         {
             // Arrange: налаштування виконано в SetUp()
 
             // Act
             var service = _container.Resolve<IBookTypeService>();
-            var result = await service.GetAllBookTypesAsync();
+            var result = await service.ReadAllBookTypesAsync();
 
             // Assert
             result.Should().HaveCount(3);

@@ -9,6 +9,6 @@ namespace BLL.Interfaces
 {
     public interface IBookTypeService
     {
-        Task<List<BookTypeDto>> GetAllBookTypesAsync();
+        Task<List<BookTypeDto>> ReadAllBookTypesAsync();
     }
 }

@@ -83,15 +83,15 @@ namespace API.Controllers
             dto.Role = "Registered";
 
             var created = await _facade.RegisterUserAsync(dto);
-            return CreatedAtAction(nameof(GetById), new { id = created.Id }, null);
+            return CreatedAtAction(nameof(ReadById), new { id = created.Id }, null);
         }
 
         // ==================== Отримати дані про користувача ====================
         [HttpGet("{id:int}")]
         [Authorize(Roles = "Manager,Administrator,Registered")]
-        public async Task<IActionResult> GetById(int id)
+        public async Task<IActionResult> ReadById(int id)
         {
-            var userDto = await _facade.GetUserByIdAsync(id);
+            var userDto = await _facade.ReadUserByIdAsync(id);
             if (userDto == null)
                 return NotFound();
 

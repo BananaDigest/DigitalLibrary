@@ -22,9 +22,9 @@ namespace API.Controllers
 
         [HttpGet]
         [AllowAnonymous]
-        public async Task<IActionResult> GetAll()
+        public async Task<IActionResult> ReadAll()
         {
-            var typeDtos = await _facade.GetAllBookTypesAsync();
+            var typeDtos = await _facade.ReadAllBookTypesAsync();
             var result = _mapper.Map<IEnumerable<BookTypeViewModel>>(typeDtos);
             return Ok(result);
         }

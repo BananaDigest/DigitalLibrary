@@ -36,24 +36,12 @@ namespace BLL.Facade
 
         // Книги
         /// <summary>Повернути всі книги.</summary>
-        public Task<IEnumerable<BookDto>> GetAllBooksAsync() =>
+        public Task<IEnumerable<BookDto>> ReadAllBooksAsync() =>
             _bookService.ReadAllAsync();
 
         /// <summary>Повернути книгу за ідентифікатором.</summary>
-        public Task<BookDto> GetBookByIdAsync(int id) =>
+        public Task<BookDto> ReadBookByIdAsync(int id) =>
             _bookService.ReadByIdAsync(id);
-
-        /// <summary>Пошук книг за терміном.</summary>
-        public Task<IEnumerable<BookDto>> SearchBooksAsync(string term) =>
-            _bookService.SearchAsync(term);
-
-        /// <summary>Фільтрація книг за типом.</summary>
-        public Task<IEnumerable<BookDto>> FilterBooksByTypeAsync(int typeId)
-    => _bookService.FilterByTypeAsync(typeId);
-
-        /// <summary>Фільтрація книг за жанром.</summary>
-        public Task<IEnumerable<BookDto>> FilterBooksByGenreAsync(int genreId) =>
-            _bookService.FilterByGenreAsync(genreId);
 
         /// <summary>Створити нову книгу.</summary>
         public Task CreateBookAsync(ActionBookDto dto) =>
@@ -72,11 +60,11 @@ namespace BLL.Facade
 
         // Жанри
         /// <summary>Повернути всі жанри.</summary>
-        public Task<IEnumerable<GenreDto>> GetAllGenresAsync() =>
+        public Task<IEnumerable<GenreDto>> ReadAllGenresAsync() =>
             _genreService.ReadAllAsync();
 
         /// <summary>Повернути жанр за ідентифікатором.</summary>
-        public Task<GenreDto> GetGenreByIdAsync(int id) =>
+        public Task<GenreDto> ReadGenreByIdAsync(int id) =>
             _genreService.ReadByIdAsync(id);
 
         /// <summary>Створити новий жанр.</summary>
@@ -121,7 +109,7 @@ namespace BLL.Facade
         }
 
         /// <summary>Отримати користувача за ідентифікатором.</summary>
-        public Task<UserDto> GetUserByIdAsync(int id) =>
+        public Task<UserDto> ReadUserByIdAsync(int id) =>
             _userService.ReadByIdAsync(id);
 
         /// <summary>Аутентифікувати користувача.</summary>
@@ -132,8 +120,8 @@ namespace BLL.Facade
         public Task DeleteUserAsync(int id) =>
             _userService.DeleteAsync(id);
 
-        public Task<List<BookTypeDto>> GetAllBookTypesAsync()
-        => _bookTypeService.GetAllBookTypesAsync();
+        public Task<List<BookTypeDto>> ReadAllBookTypesAsync()
+        => _bookTypeService.ReadAllBookTypesAsync();
 
         public async Task UpdateUserAsync(UserDto dto)
             => await _userService.UpdateUserAsync(dto);

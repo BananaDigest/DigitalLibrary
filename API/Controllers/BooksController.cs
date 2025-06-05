@@ -24,9 +24,9 @@ namespace API.Controllers
 
         [HttpGet]
         [AllowAnonymous] // усі можуть дивитися каталог без логіну
-        public async Task<IActionResult> GetAll()
+        public async Task<IActionResult> ReadAll()
         {
-            var bookDtos = await _facade.GetAllBooksAsync();
+            var bookDtos = await _facade.ReadAllBooksAsync();
             var result = _mapper.Map<IEnumerable<BookViewModel>>(bookDtos);
             return Ok(result);
         }
@@ -40,7 +40,7 @@ namespace API.Controllers
 
             var dto = _mapper.Map<ActionBookDto>(model);
             await _facade.CreateBookAsync(dto);
-            return CreatedAtAction(nameof(GetBookById), new { id = dto.Id }, null);
+            return CreatedAtAction(nameof(ReadBookById), new { id = dto.Id }, null);
         }
 
         [HttpPut("{id:int}")]
@@ -65,9 +65,9 @@ namespace API.Controllers
         }
 
         [HttpGet("{id:int}")]
-        public async Task<IActionResult> GetBookById(int id)
+        public async Task<IActionResult> ReadBookById(int id)
         {
-            var bookDto = await _facade.GetBookByIdAsync(id);
+            var bookDto = await _facade.ReadBookByIdAsync(id);
             if (bookDto == null)
                 return NotFound();
 

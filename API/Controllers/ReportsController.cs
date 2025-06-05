@@ -19,9 +19,9 @@ namespace API.Controllers
         }
 
         [HttpGet("paper-availability")]
-        public async Task<IActionResult> GetPaperAvailability()
+        public async Task<IActionResult> ReadPaperAvailability()
         {
-            var books = await _facade.GetAllBooksAsync();
+            var books = await _facade.ReadAllBooksAsync();
             var report = books.Select(b => new
             {
                 b.Id,
@@ -33,7 +33,7 @@ namespace API.Controllers
         }
 
         [HttpGet("paper-orders")]
-        public async Task<IActionResult> GetPaperOrdersReport()
+        public async Task<IActionResult> ReadPaperOrdersReport()
         {
             var orders = await _facade.ReadAllOrdersAsync();
             var paperOrders = orders
@@ -48,9 +48,9 @@ namespace API.Controllers
         }
 
         [HttpGet("digital-metrics")]
-        public async Task<IActionResult> GetDigitalMetrics()
+        public async Task<IActionResult> ReadDigitalMetrics()
         {
-            var books = await _facade.GetAllBooksAsync();
+            var books = await _facade.ReadAllBooksAsync();
             var metrics = books.Select(b => new
             {
                 b.Id,

@@ -21,7 +21,7 @@ namespace BLL.Services
             _mapper = mapper;
         }
 
-        public async Task<List<BookTypeDto>> GetAllBookTypesAsync()
+        public async Task<List<BookTypeDto>> ReadAllBookTypesAsync()
         {
             var entities = await _uow.BookTypes.ReadAllAsync();
             return _mapper.Map<List<BookTypeDto>>(entities.ToList());

@@ -23,18 +23,18 @@ namespace API.Controllers
 
         [HttpGet]
         [AllowAnonymous]
-        public async Task<IActionResult> GetAll()
+        public async Task<IActionResult> ReadAll()
         {
-            var genreDtos = await _facade.GetAllGenresAsync();
+            var genreDtos = await _facade.ReadAllGenresAsync();
             var result = _mapper.Map<IEnumerable<GenreViewModel>>(genreDtos);
             return Ok(result);
         }
 
         [HttpGet("{id:int}")]
         [AllowAnonymous]
-        public async Task<IActionResult> GetById(int id)
+        public async Task<IActionResult> ReadById(int id)
         {
-            var genreDto = await _facade.GetGenreByIdAsync(id);
+            var genreDto = await _facade.ReadGenreByIdAsync(id);
             if (genreDto == null)
                 return NotFound();
 
@@ -51,7 +51,7 @@ namespace API.Controllers
 
             var dto = _mapper.Map<GenreDto>(model);
             await _facade.CreateGenreAsync(dto);
-            return CreatedAtAction(nameof(GetById), new { id = dto.Id }, null);
+            return CreatedAtAction(nameof(ReadById), new { id = dto.Id }, null);
         }
 
         [HttpPut("{id:int}")]
