@@ -28,7 +28,13 @@ namespace BLL.Services
 
         public async Task<IEnumerable<BookDto>> ReadAllAsync()
         {
-            var books = await _uow.Books.ReadAllAsync();
+            var books = await _uow.Books
+                .ReadAll()
+                .Include(b => b.AvailableTypes)
+                .Include(b => b.Copies)
+                .Include(b => b.Genre)
+                .ToListAsync();
+
             return _mapper.Map<IEnumerable<BookDto>>(books);
         }
 
