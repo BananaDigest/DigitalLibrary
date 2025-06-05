@@ -8,7 +8,10 @@ namespace API.Models
         [Required] public string LastName { get; set; }
 
         [Required]
-        [EmailAddress]
+        [RegularExpression(
+        @"^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$",
+        ErrorMessage = "Невірний формат електронної адреси"
+        )]
         public string Email { get; set; }
 
         [Required] public string Password { get; set; }

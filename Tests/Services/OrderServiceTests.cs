@@ -208,47 +208,6 @@ namespace Tests.Services
             Assert.That(ex.Message, Is.EqualTo("Mapping failed"));
         }
 
-        //[Test]
-        //public async Task ReadByIdAsync_ExistingId_ReturnsMappedDto()
-        //{
-        //    // ARRANGE
-        //    var domainOrder = new Order
-        //    {
-        //        Id = 42,
-        //        UserId = 7,
-        //        BookId = 13,
-        //        BookCopyId = 21,
-        //        OrderTypeId = (int)BookType.Audio,
-        //        OrderDate = new DateTime(2023, 3, 15),
-        //        Book = null,
-        //        BookCopy = null,
-        //        OrderType = null
-        //    };
-
-        //    // 1) Додаємо запис у InMemory‐таблицю
-        //    _inMemoryContext.Orders.Add(domainOrder);
-        //    _inMemoryContext.SaveChanges();
-
-        //    // 2) Підсовуємо репозиторію “живий” DbSet для коректного FirstOrDefaultAsync
-        //    _uowMock.Orders.ReadAllOrder().Returns(_inMemoryContext.Orders);
-
-        //    // ACT
-        //    var dto = await _service.ReadByIdAsync(42);
-
-        //    // ASSERT
-        //    dto.Should().NotBeNull();
-        //    dto.Id.Should().Be(42);
-        //    dto.UserId.Should().Be(7);
-        //    dto.BookId.Should().Be(13);
-        //    dto.BookCopyId.Should().Be(21);
-        //    dto.OrderType.Should().Be(BookType.Audio);
-        //    dto.OrderDate.Should().Be(new DateTime(2023, 3, 15));
-        //}
-
-        //#TODO спитати у Віки, що робити з цими тестами GetById в Orders,
-        //тобто залишити так, як є (лише ReadByIdAsync_WhenReadAllOrderReturnsNull_ThrowsNullReferenceException)
-        //чи додати ще тестів
-
         // -------------------------------------------------------------------
         // Тест 3: ReadAllOrder() повертає null → NullReferenceException
         // -------------------------------------------------------------------
