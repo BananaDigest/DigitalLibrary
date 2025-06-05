@@ -112,6 +112,10 @@ namespace BLL.Facade
         public Task<UserDto> ReadUserByIdAsync(int id) =>
             _userService.ReadByIdAsync(id);
 
+        /// <summary>Отримати всіх користувачів (без паролів).</summary>
+        public Task<IEnumerable<UserDto>> ReadAllUsersAsync() =>
+            _userService.ReadAllUsersAsync();
+
         /// <summary>Аутентифікувати користувача.</summary>
         public Task<UserDto> AuthenticateAsync(string email, string password) =>
             _userService.AuthenticateAsync(email, password);

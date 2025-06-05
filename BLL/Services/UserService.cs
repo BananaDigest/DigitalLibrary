@@ -41,6 +41,23 @@ namespace BLL.Services
             }
         }
 
+        public async Task<IEnumerable<UserDto>> ReadAllUsersAsync()
+        {
+            // 1) Зчитуємо усіх юзерів (повертає IEnumerable<User>)
+            var allEntities = await _uow.Users.ReadAllAsync();
+
+            // 2) Мапимо на List<UserDto>
+            var dtoList = _mapper.Map<List<UserDto>>(allEntities);
+
+            // 3) В ручному циклі прибираємо пароль
+            foreach (var dto in dtoList)
+            {
+                dto.Password = null;
+            }
+
+            return dtoList;
+        }
+
         public async Task<UserDto> ReadByIdAsync(int id)
         {
             var user = await _uow.Users.ReadByIdAsync(id)

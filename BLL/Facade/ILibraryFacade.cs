@@ -27,6 +27,7 @@ namespace BLL.Facade
         public Task DeleteOrderAsync(int id);
         public Task<UserDto> RegisterUserAsync(UserDto dto);
         public Task<UserDto> ReadUserByIdAsync(int id);
+        Task<IEnumerable<UserDto>> ReadAllUsersAsync();
         public Task<UserDto> AuthenticateAsync(string email, string password);
         public Task DeleteUserAsync(int id);
         public Task<List<BookTypeDto>> ReadAllBookTypesAsync();

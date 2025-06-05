@@ -105,6 +105,15 @@ namespace API.Controllers
             return Ok(result);
         }
 
+        [HttpGet("get all users without password")]
+        [Authorize(Roles = "Manager,Administrator")]
+        public async Task<IActionResult> ReadAll()
+        {
+            var users = await _facade.ReadAllUsersAsync();
+            // Передамо у ViewModel (якщо потрібна додаткова фільтрація) або просто повернемо як є:
+            return Ok(users);
+        }
+
         // ==================== Оновлення даних користувача ====================
         [HttpPut("{id:int}")]
         [Authorize(Roles = "Manager,Administrator,Registered")]
