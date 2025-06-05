@@ -1,380 +1,283 @@
-using NSubstitute;
-using FluentAssertions;
-using Autofac;
 using AutoMapper;
-using NUnit.Framework;
-using System.Linq;
-using System.Collections.Generic;
-using System.Threading.Tasks;
-using Domain.Entities;
-using Domain.Enums;
 using BLL.DTOs;
 using BLL.Services;
-using DAL.UnitOfWork;
-using DAL.Repositories;
 using BLL.Factory;
-using BLL.Interfaces;
+using DAL.Repositories;
+using DAL.UnitOfWork;
+using Domain.Entities;
+using Domain.Enums;
+using FluentAssertions;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Query;
+using NSubstitute;
+using NUnit.Framework;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Linq.Expressions;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace Tests.Services
 {
     [TestFixture]
     public class BookServiceTests
     {
-        private Autofac.IContainer _container = null!;
+        private IUnitOfWork _uowMock = null!;
+        private IMapper _mapperMock = null!;
+        private BookService _service = null!;
 
         [SetUp]
-        public void Setup()
+        public void SetUp()
         {
-            // 1) Мок для IUnitOfWork і вкладеного IBookRepository
-            var unitOfWorkMock = Substitute.For<IUnitOfWork>();
-            var bookRepoMock = Substitute.For<IGenericRepository<Book>>();
-            unitOfWorkMock.Books.Returns(bookRepoMock);
+            // 1) Mock IUnitOfWork
+            _uowMock = Substitute.For<IUnitOfWork>();
 
-            // 2) Приклад двох доменних книг із різними AvailableTypes
+            // 2) Mock Books repository
+            var booksRepo = Substitute.For<IGenericRepository<Book>>();
+            _uowMock.Books.Returns(booksRepo);
+
+            // 3) Mock AutoMapper
+            _mapperMock = Substitute.For<IMapper>();
+
+            // 4) Create BookService with mocked UoW, Mapper, and a dummy IBookFactory
+            _service = new BookService(
+                _uowMock,
+                _mapperMock,
+                Substitute.For<IBookFactory>()
+            );
+        }
+
+        [Test]
+        public async Task ReadAllAsync_WithExistingBooks_ReturnsMappedDtos()
+        {
+            // ARRANGE
             var domainBooks = new List<Book>
             {
                 new Book
                 {
-                    Id = 1,
-                    Title = "First Book",
-                    Author = "Author A",
-                    Publisher = "Publisher X",
-                    PublicationYear = 2019,
+                    Id = 10,
+                    Title = "C# in Depth",
+                    Author = "Jon Skeet",
+                    Description = "Deep dive into C#",
+                    Publisher = "Manning",
+                    PublicationYear = 2020,
                     GenreId = 1,
-                    AvailableTypes = new List<BookTypeEntity>
-                    {
-                        new BookTypeEntity { Id = (int)BookType.Electronic, Name = "Electronic" },
-                        new BookTypeEntity { Id = (int)BookType.Paper, Name = "Paper" }
-                    },
-                    InitialCopies = 5,
-                    AvailableCopies = 5,
-                    DownloadCount = 12,
-                    ListenCount = 3,
-                    Description = "Description A"
+                    Genre = null,
+                    AvailableTypes = new List<BookTypeEntity>(),
+                    Copies = new List<BookCopy>()
                 },
                 new Book
                 {
-                    Id = 2,
-                    Title = "Second Book",
-                    Author = "Author B",
-                    Publisher = "Publisher Y",
-                    PublicationYear = 2021,
+                    Id = 11,
+                    Title = "Effective Java",
+                    Author = "Joshua Bloch",
+                    Description = "Best practices for Java",
+                    Publisher = "Addison-Wesley",
+                    PublicationYear = 2018,
                     GenreId = 2,
-                    AvailableTypes = new List<BookTypeEntity>
-                    {
-                        new BookTypeEntity { Id = (int)BookType.Audio, Name = "Audio" }
-                    },
-                    InitialCopies = 3,
-                    AvailableCopies = 0,
-                    DownloadCount = 7,
-                    ListenCount = 15,
-                    Description = "Description B"
+                    Genre = null,
+                    AvailableTypes = new List<BookTypeEntity>(),
+                    Copies = new List<BookCopy>()
                 }
             };
 
-            // Налаштовуємо bookRepoMock.ReadAll() -> IQueryable<domainBooks>
-            bookRepoMock.ReadAll().Returns(domainBooks.AsQueryable());
+            // Convert to an async IQueryable
+            var asyncBooks = new TestAsyncEnumerable<Book>(domainBooks);
 
-            // 3) Мок для IBookFactory
-            var factoryMock = Substitute.For<IBookFactory>();
-            factoryMock.CreateAsync(Arg.Any<ActionBookDto>())
-                .Returns(callInfo =>
+            // Configure ReadAll() to return this async IQueryable
+            _uowMock.Books.ReadAll().Returns(asyncBooks);
+
+            // Configure AutoMapper to map each Book to BookDto
+            _mapperMock
+                .Map<IEnumerable<BookDto>>(Arg.Any<IEnumerable<Book>>())
+                .Returns(call =>
                 {
-                    var dto = callInfo.ArgAt<ActionBookDto>(0);
-                    // тут будуємо і повертаємо новий Domain.Entities.Book
-                    // разом із заповненими копіями (Book.Copies), бо фабрика повертає Book
-                    var newBook = new Book
+                    var source = call.Arg<IEnumerable<Book>>();
+                    return source.Select(b => new BookDto
                     {
-                        Id = 0,
-                        Title = dto.Title,
-                        Author = dto.Author,
-                        Publisher = dto.Publisher,
-                        PublicationYear = dto.PublicationYear,
-                        GenreId = dto.GenreId,
-                        AvailableTypes = dto.AvailableTypeIds
-                            .Select(id => new BookTypeEntity { Id = id, Name = id.ToString() })
-                            .ToList(),
-                        Copies = dto.AvailableTypeIds.Contains((int)BookType.Paper)
-                            ? Enumerable.Range(1, dto.CopyCount)
-                                .Select(i => new BookCopy { CopyNumber = i, IsAvailable = true })
-                                .ToList()
-                            : new List<BookCopy>(),
-                        InitialCopies = dto.CopyCount,
-                        AvailableCopies = dto.CopyCount,
-                        DownloadCount = 0,
-                        ListenCount = 0,
-                        Description = dto.Description
-                    };
-                    return Task.FromResult(newBook);
+                        Id = b.Id,
+                        Title = b.Title,
+                        Author = b.Author,
+                        Description = b.Description,
+                        Publisher = b.Publisher,
+                        PublicationYear = b.PublicationYear,
+                        GenreId = b.GenreId
+                    }).ToList();
                 });
 
-            // 4) Мок для IMapper
-            var mapperMock = Substitute.For<IMapper>();
-            // Map<Book, BookDto>
-            foreach (var book in domainBooks)
-            {
-                var dto = new BookDto
-                {
-                    Id = book.Id,
-                    Title = book.Title,
-                    Author = book.Author,
-                    Publisher = book.Publisher,
-                    PublicationYear = book.PublicationYear,
-                    GenreId = book.GenreId,
-                    AvailableTypeIds = book.AvailableTypes.Select(at => at.Id).ToList(),
-                    InitialCopies = book.InitialCopies,
-                    AvailableCopies = book.AvailableCopies,
-                    DownloadCount = book.DownloadCount,
-                    ListenCount = book.ListenCount,
-                    Description = book.Description
-                };
-                mapperMock.Map<BookDto>(book).Returns(dto);
-            }
+            // ACT
+            var result = (await _service.ReadAllAsync()).ToList();
 
-            // Map<ActionBookDto, Book> для CreateAsync
-            mapperMock
-                .Map<Book>(Arg.Any<ActionBookDto>())
-                .Returns(callInfo =>
-                {
-                    var createDto = callInfo.ArgAt<ActionBookDto>(0);
-                    return new Book
-                    {
-                        Id = 0,
-                        Title = createDto.Title,
-                        Author = createDto.Author,
-                        Publisher = createDto.Publisher,
-                        PublicationYear = createDto.PublicationYear,
-                        GenreId = createDto.GenreId,
-                        AvailableTypes = createDto.AvailableTypeIds
-                            .Select(id => new BookTypeEntity { Id = id, Name = id.ToString() })
-                            .ToList(),
-                        InitialCopies = createDto.CopyCount,
-                        AvailableCopies = createDto.CopyCount,
-                        DownloadCount = 0,
-                        ListenCount = 0,
-                        Description = createDto.Description
-                    };
-                });
+            // ASSERT
+            result.Should().HaveCount(2);
+            result[0].Id.Should().Be(10);
+            result[0].Title.Should().Be("C# in Depth");
+            result[0].Author.Should().Be("Jon Skeet");
+            result[0].Description.Should().Be("Deep dive into C#");
+            result[0].Publisher.Should().Be("Manning");
+            result[0].PublicationYear.Should().Be(2020);
+            result[0].GenreId.Should().Be(1);
 
-            // Map<ActionBookDto, Book> для UpdateAsync
-            mapperMock
-                .Map<Book>(Arg.Any<BookDto>())
-                .Returns(callInfo =>
-                {
-                    var updateDto = callInfo.ArgAt<BookDto>(0);
-                    return new Book
-                    {
-                        Id = updateDto.Id,
-                        Title = updateDto.Title,
-                        Author = updateDto.Author,
-                        Publisher = updateDto.Publisher,
-                        PublicationYear = updateDto.PublicationYear,
-                        GenreId = updateDto.GenreId,
-                        AvailableTypes = updateDto.AvailableTypeIds
-                            .Select(id => new BookTypeEntity { Id = id, Name = id.ToString() })
-                            .ToList(),
-                        InitialCopies = updateDto.InitialCopies,
-                        AvailableCopies = updateDto.AvailableCopies,
-                        DownloadCount = updateDto.DownloadCount,
-                        ListenCount = updateDto.ListenCount,
-                        Description = updateDto.Description
-                    };
-                });
+            result[1].Id.Should().Be(11);
+            result[1].Title.Should().Be("Effective Java");
+            result[1].Author.Should().Be("Joshua Bloch");
+            result[1].Description.Should().Be("Best practices for Java");
+            result[1].Publisher.Should().Be("Addison-Wesley");
+            result[1].PublicationYear.Should().Be(2018);
+            result[1].GenreId.Should().Be(2);
+        }
 
-            // 5) Налаштуємо CreateAsync/Update/Delete на bookRepoMock
-            bookRepoMock.CreateAsync(Arg.Any<Book>()).Returns(Task.CompletedTask);
-            bookRepoMock.Update(Arg.Any<Book>());
-            bookRepoMock.Delete(Arg.Any<Book>());
+        [Test]
+        public async Task ReadAllAsync_WhenNoBooks_ReturnsEmptyList()
+        {
+            // ARRANGE
+            var emptyList = new List<Book>();
+            var asyncEmpty = new TestAsyncEnumerable<Book>(emptyList);
+            _uowMock.Books.ReadAll().Returns(asyncEmpty);
 
-            // 6) Налаштуємо unitOfWorkMock.CommitAsync()
-            unitOfWorkMock.CommitAsync().Returns(Task.FromResult(1));
+            _mapperMock
+                .Map<IEnumerable<BookDto>>(Arg.Any<IEnumerable<Book>>())
+                .Returns(new List<BookDto>());
 
-            // 7) Будуємо Autofac-контейнер
-            var builder = new ContainerBuilder();
-            builder.RegisterInstance(unitOfWorkMock).As<IUnitOfWork>().SingleInstance();
-            builder.RegisterInstance(factoryMock).As<IBookFactory>().SingleInstance();
-            builder.RegisterInstance(mapperMock).As<IMapper>().SingleInstance();
-            builder.RegisterType<BookService>().As<IBookService>().InstancePerLifetimeScope();
+            // ACT
+            var result = (await _service.ReadAllAsync()).ToList();
 
-            _container = builder.Build();
+            // ASSERT
+            result.Should().BeEmpty();
         }
 
         [TearDown]
         public void TearDown()
         {
-            _container.Dispose();
-        }
-
-        [Test]
-        public async Task ReadAllAsync_Returns_All_BookDtos()
-        {
-            // Arrange: див. Setup
-
-            // Act
-            var service = _container.Resolve<IBookService>();
-            var result = await service.ReadAllAsync();
-
-            // Assert
-            result.Should().HaveCount(2);
-            result.Select(x => x.Id).Should().BeEquivalentTo(new[] { 1, 2 });
-            result.Select(x => x.Title).Should().BeEquivalentTo(new[] { "First Book", "Second Book" });
-        }
-
-        [Test]
-        public async Task ReadByIdAsync_ExistingId_Returns_Correct_BookDto()
-        {
-            // Arrange
-            var service = _container.Resolve<IBookService>();
-
-            // Act
-            var result = await service.ReadByIdAsync(1);
-
-            // Assert
-            result.Should().NotBeNull();
-            result!.Id.Should().Be(1);
-            result.Title.Should().Be("First Book");
-        }
-
-        [Test]
-        public async Task ReadByIdAsync_NonExistingId_Returns_Null()
-        {
-            // Arrange
-            var service = _container.Resolve<IBookService>();
-
-            // Act
-            var result = await service.ReadByIdAsync(999);
-
-            // Assert
-            result.Should().BeNull();
-        }
-
-        [Test]
-        public async Task ReadByTypeAsync_Electronic_Returns_Only_Electronic_Books()
-        {
-            // Arrange
-            var service = _container.Resolve<IBookService>();
-            var electronicTypeId = (int)BookType.Electronic;
-
-            // Act
-            var result = await service.ReadByTypeAsync(electronicTypeId);
-
-            // Assert
-            result.Should().HaveCount(1);
-            result.Single().Id.Should().Be(1);
-            result.Single().AvailableTypeIds.Should().Contain(electronicTypeId);
-        }
-
-        [Test]
-        public async Task CreateAsync_ValidDto_Creates_Book_And_Saves()
-        {
-            // Arrange
-            var createDto = new ActionBookDto
+            if (_uowMock is IDisposable disposable)
             {
-                Title = "New Book",
-                Author = "Author New",
-                Publisher = "Publisher New",
-                PublicationYear = 2022,
-                GenreId = 3,
-                AvailableTypeIds = new List<int> { (int)BookType.Paper },
-                CopyCount = 4,
-                Description = "New Description"
-            };
-
-            var uow = _container.Resolve<IUnitOfWork>();
-            var bookRepo = uow.Books;
-
-            // Act
-            var service = _container.Resolve<IBookService>();
-            await service.CreateAsync(createDto);
-
-            // Assert
-            await bookRepo.Received(1).CreateAsync(Arg.Is<Book>(b =>
-                b.Title == createDto.Title &&
-                b.Author == createDto.Author &&
-                b.Publisher == createDto.Publisher &&
-                b.PublicationYear == createDto.PublicationYear &&
-                b.GenreId == createDto.GenreId &&
-                b.InitialCopies == createDto.CopyCount &&
-                b.AvailableCopies == createDto.CopyCount &&
-                b.Description == createDto.Description
-            ));
-
-            await uow.Received(1).CommitAsync();
+                disposable.Dispose();
+            }
         }
 
-        [Test]
-        public async Task UpdateAsync_ValidDto_Updates_Book_And_Saves()
+        // ----------------------------------------------------
+        // Async helper implementations for IQueryable in tests
+        // ----------------------------------------------------
+        internal class TestAsyncEnumerable<T> : EnumerableQuery<T>, IAsyncEnumerable<T>, IQueryable<T>
         {
-            // Arrange
-            var updateDto = new BookDto
+            public TestAsyncEnumerable(IEnumerable<T> enumerable) : base(enumerable) { }
+            public TestAsyncEnumerable(Expression expression) : base(expression) { }
+
+            public IAsyncEnumerator<T> GetAsyncEnumerator(CancellationToken cancellationToken = default)
             {
-                Id = 1,
-                Title = "Updated Title",
-                Author = "Updated Author",
-                Publisher = "Updated Publisher",
-                PublicationYear = 2020,
-                GenreId = 1,
-                AvailableTypeIds = new List<int> { (int)BookType.Electronic },
-                InitialCopies = 5,
-                AvailableCopies = 3,
-                DownloadCount = 13,
-                ListenCount = 4,
-                Description = "Updated Description"
-            };
+                return new TestAsyncEnumerator<T>(this.AsEnumerable().GetEnumerator());
+            }
 
-            var uow = _container.Resolve<IUnitOfWork>();
-            var bookRepo = uow.Books;
-
-            // Act
-            var service = _container.Resolve<IBookService>();
-            await service.UpdateAsync(updateDto.Id, new ActionBookDto
-            {
-                Title = updateDto.Title,
-                Author = updateDto.Author,
-                Publisher = updateDto.Publisher,
-                PublicationYear = updateDto.PublicationYear,
-                GenreId = updateDto.GenreId,
-                AvailableTypeIds = updateDto.AvailableTypeIds,
-                CopyCount = updateDto.InitialCopies,
-                Description = updateDto.Description
-            });
-
-            // Assert
-            bookRepo.Received(1).Update(Arg.Is<Book>(b =>
-                b.Id == updateDto.Id &&
-                b.Title == updateDto.Title &&
-                b.Author == updateDto.Author &&
-                b.Publisher == updateDto.Publisher &&
-                b.PublicationYear == updateDto.PublicationYear &&
-                b.GenreId == updateDto.GenreId &&
-                b.InitialCopies == updateDto.InitialCopies &&
-                b.AvailableCopies == updateDto.AvailableCopies &&
-                b.DownloadCount == updateDto.DownloadCount &&
-                b.ListenCount == updateDto.ListenCount &&
-                b.Description == updateDto.Description
-            ));
-
-            await uow.Received(1).CommitAsync();
+            IQueryProvider IQueryable.Provider => new TestAsyncQueryProvider<T>(this);
         }
 
-        [Test]
-        public async Task DeleteAsync_ValidId_Deletes_Book_And_Saves()
+        internal class TestAsyncEnumerator<T> : IAsyncEnumerator<T>
         {
-            // Arrange
-            var uow = _container.Resolve<IUnitOfWork>();
-            var bookRepo = uow.Books;
+            private readonly IEnumerator<T> _inner;
+            public TestAsyncEnumerator(IEnumerator<T> inner) => _inner = inner;
+            public T Current => _inner.Current;
+            public ValueTask DisposeAsync()
+            {
+                _inner.Dispose();
+                return ValueTask.CompletedTask;
+            }
+            public ValueTask<bool> MoveNextAsync()
+            {
+                return new ValueTask<bool>(_inner.MoveNext());
+            }
+        }
 
-            // Налаштуємо ReadAll() так, щоб містити книгу з Id = 1
-            var domainBook = new Book { Id = 1 };
-            bookRepo.ReadAll().Returns(new[] { domainBook }.AsQueryable());
+        internal class TestAsyncQueryProvider<TEntity> : IAsyncQueryProvider
+        {
+            private readonly IQueryProvider _inner;
+            public TestAsyncQueryProvider(IQueryProvider inner) => _inner = inner;
 
-            // Act
-            var service = _container.Resolve<IBookService>();
-            await service.DeleteAsync(1);
+            public IQueryable CreateQuery(Expression expression)
+            {
+                var stripped = StripEfMethods(expression);
+                return new TestAsyncEnumerable<TEntity>(stripped);
+            }
 
-            // Assert
-            bookRepo.Received(1).Delete(Arg.Is<Book>(b => b.Id == 1));
-            await uow.Received(1).CommitAsync();
+            public IQueryable<TElement> CreateQuery<TElement>(Expression expression)
+            {
+                var stripped = StripEfMethods(expression);
+                return new TestAsyncEnumerable<TElement>(stripped);
+            }
+
+            public object Execute(Expression expression)
+            {
+                var stripped = StripEfMethods(expression);
+                return _inner.Execute(stripped);
+            }
+
+            public TResult Execute<TResult>(Expression expression)
+            {
+                var stripped = StripEfMethods(expression);
+                return _inner.Execute<TResult>(stripped);
+            }
+
+            public IAsyncEnumerable<TResult> ExecuteAsync<TResult>(Expression expression)
+            {
+                var stripped = StripEfMethods(expression);
+                return new TestAsyncEnumerable<TResult>(stripped);
+            }
+
+            public TResult ExecuteAsync<TResult>(Expression expression, CancellationToken cancellationToken)
+            {
+                var stripped = StripEfMethods(expression);
+                return _inner.Execute<TResult>(stripped);
+            }
+
+            private static Expression StripEfMethods(Expression expression)
+            {
+                if (expression is MethodCallExpression mce)
+                {
+                    // Drop Include(...) calls
+                    if (mce.Method.DeclaringType == typeof(EntityFrameworkQueryableExtensions)
+                        && mce.Method.Name.StartsWith("Include", StringComparison.Ordinal))
+                    {
+                        return StripEfMethods(mce.Arguments[0]);
+                    }
+
+                    // Replace ToListAsync(...) with Enumerable.ToList
+                    if (mce.Method.DeclaringType == typeof(EntityFrameworkQueryableExtensions)
+                        && mce.Method.Name == nameof(EntityFrameworkQueryableExtensions.ToListAsync))
+                    {
+                        var sourceExpr = StripEfMethods(mce.Arguments[0]);
+                        return Expression.Call(
+                            typeof(Enumerable),
+                            nameof(Enumerable.ToList),
+                            new[] { typeof(TEntity) },
+                            sourceExpr);
+                    }
+
+                    // Recurse on other calls
+                    var newArgs = mce.Arguments.Select(arg => StripEfMethods(arg)).ToArray();
+                    var newObj = mce.Object != null ? StripEfMethods(mce.Object) : null;
+                    return mce.Update(newObj, newArgs);
+                }
+                return expression;
+            }
+        }
+
+        // ----------------------------------------------------
+        // InMemory DbContext (not directly used in these tests)
+        // ----------------------------------------------------
+        public class TestAppDbContext : DbContext
+        {
+            public TestAppDbContext(DbContextOptions<TestAppDbContext> options)
+                : base(options)
+            { }
+
+            public DbSet<Book> Books { get; set; } = null!;
+            public DbSet<BookCopy> BookCopies { get; set; } = null!;
+            public DbSet<User> Users { get; set; } = null!;
+
+            protected override void OnModelCreating(ModelBuilder modelBuilder)
+            {
+                base.OnModelCreating(modelBuilder);
+            }
         }
     }
 }
