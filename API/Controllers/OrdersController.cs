@@ -3,6 +3,7 @@ using AutoMapper;
 using BLL.DTOs;
 using BLL.Facade;
 using BLL.Interfaces;
+using BLL.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
@@ -25,7 +26,7 @@ namespace API.Controllers
 
         [HttpGet]
         [Authorize(Roles = "Manager,Administrator")]
-        public async Task<IActionResult> GetAll()
+        public async Task<IActionResult> ReadAll()
         {
             var orderDtos = await _facade.ReadAllOrdersAsync();
             var result = _mapper.Map<IEnumerable<OrderViewModel>>(orderDtos);
@@ -34,7 +35,7 @@ namespace API.Controllers
 
         [HttpGet("{id:int}")]
         [Authorize(Roles = "Manager,Administrator,Registered")]
-        public async Task<IActionResult> GetById(int id)
+        public async Task<IActionResult> ReadById(int id)
         {
             var currentUserId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value);
             var currentRole = User.FindFirst(ClaimTypes.Role)?.Value;
@@ -51,7 +52,7 @@ namespace API.Controllers
         }
 
         [HttpGet("by-user/{userId:int}")]
-        public async Task<IActionResult> GetByUser(int userId)
+        public async Task<IActionResult> ReadByUser(int userId)
         {
 
             var currentUserId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value);
@@ -98,15 +99,37 @@ namespace API.Controllers
             // 5. Створюємо замовлення
             await _facade.CreateOrderAsync(dto);
 
-            return CreatedAtAction(nameof(GetById), new { id = dto.Id }, null);
+            return CreatedAtAction(nameof(ReadById), new { id = dto.Id }, null);
+        }
+
+        [HttpPatch("{id:int}/status")]
+        [Authorize(Roles = "Administrator")]
+        public async Task<IActionResult> UpdateStatus(int id)
+        {
+            try
+            {
+                await _facade.UpdateStatusAsync(id);
+                return NoContent();
+            }
+            catch (KeyNotFoundException)
+            {
+                return NotFound();
+            }
+            catch (InvalidOperationException ex)
+            {
+                return BadRequest(ex.Message);
+            }
         }
 
         [HttpDelete("{id:int}")]
         [Authorize]
         public async Task<IActionResult> Delete(int id)
         {
-            // 1. Отримуємо сам об’єкт замовлення (щоб дізнатися, кому воно належить)
-            var orderDto = await _facade.ReadOrderByIdAsync(id);
+            var isAdmin = User.IsInRole("Administrator");
+            try
+            {
+                // 1. Отримуємо сам об’єкт замовлення (щоб дізнатися, кому воно належить)
+                var orderDto = await _facade.ReadOrderByIdAsync(id);
             if (orderDto == null)
                 return NotFound();
 
@@ -119,8 +142,17 @@ namespace API.Controllers
                 return Forbid();
 
             // 4. Інакше видаляємо
-            await _facade.DeleteOrderAsync(id);
+            await _facade.DeleteOrderAsync(id, isAdmin);
             return NoContent();
+            }
+            catch (UnauthorizedAccessException)
+            {
+                return Forbid();
+            }
+            catch (KeyNotFoundException)
+            {
+                return NotFound();
+            }
         }
     }
 }

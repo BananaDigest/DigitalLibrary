@@ -96,9 +96,12 @@ namespace BLL.Facade
         public Task CreateOrderAsync(ActionOrderDto dto) =>
             _orderService.CreateAsync(dto);
 
+        public Task UpdateStatusAsync(int orderId) =>
+            _orderService.UpdateStatusAsync(orderId);
+
         /// <summary>Видалити замовлення.</summary>
-        public Task DeleteOrderAsync(int id) =>
-            _orderService.DeleteAsync(id);
+        public Task DeleteOrderAsync(int id, bool isAdmin) =>
+            _orderService.DeleteAsync(id, isAdmin);
 
         // Користувачі
         /// <summary>Зареєструвати користувача.</summary>

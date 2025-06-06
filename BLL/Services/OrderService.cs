@@ -122,6 +122,16 @@ namespace BLL.Services
             // Ось тут явно задаємо дату
             orderEntity.OrderDate = DateTime.UtcNow;
 
+            if (dto.OrderType == BookType.Paper)
+            {
+                orderEntity.Status = OrderStatus.Awaiting;
+            }
+            else
+            {
+                // для Audio і Electronic
+                orderEntity.Status = OrderStatus.NoPaper;
+            }
+
             // 5) Зберегти Order
             await _uow.Orders.CreateAsync(orderEntity);
 
@@ -140,7 +150,26 @@ namespace BLL.Services
             await _uow.CommitAsync();
         }
 
-        public async Task DeleteAsync(int orderId)
+        public async Task UpdateStatusAsync(int orderId)
+        {
+            var orderEntity = await _uow.Orders
+                .ReadAllOrder()
+                .FirstOrDefaultAsync(o => o.Id == orderId);
+
+            if (orderEntity == null)
+                throw new KeyNotFoundException($"Order with Id = {orderId} not found.");
+
+            // Дозволяємо змінювати лише з “Awaiting” → “WithUser”
+            if (orderEntity.Status != OrderStatus.Awaiting)
+                throw new InvalidOperationException("Cannot change status: only orders in Awaiting can be moved to WithUser.");
+
+            orderEntity.Status = OrderStatus.WithUser;
+            _uow.Orders.Update(orderEntity);
+            await _uow.CommitAsync();
+        }
+
+
+        public async Task DeleteAsync(int orderId, bool isAdmin)
         {
             // 1) Завантажити замовлення разом із Book і BookCopy (якщо було паперове)
             var orderEntity = await _uow.Orders
@@ -151,6 +180,10 @@ namespace BLL.Services
 
             if (orderEntity == null)
                 throw new KeyNotFoundException($"Order with Id = {orderId} not found.");
+            if (orderEntity.Status == OrderStatus.WithUser && !isAdmin)
+            {
+                throw new UnauthorizedAccessException("Only admin can delete an order that is already with user.");
+            }
 
             var bookEntity = orderEntity.Book;
             if (bookEntity == null)

@@ -15,6 +15,7 @@ namespace BLL.Interfaces
         Task<OrderDto> ReadByIdAsync(int id);
         Task<IEnumerable<OrderDto>> ReadByUserAsync(int userId);
         Task CreateAsync(ActionOrderDto dto);
-        Task DeleteAsync(int id);
+        Task UpdateStatusAsync(int orderId);
+        Task DeleteAsync(int id, bool isAdmin);
     }
 }

@@ -26,7 +26,8 @@ namespace API.Mapping
                 .ForMember(dest => dest.BookId, opt => opt.MapFrom(src => src.BookId))
                 .ForMember(dest => dest.OrderType, opt => opt.MapFrom(src => src.OrderType))
                 .ForMember(dest => dest.BookCopyId, opt => opt.MapFrom(src => src.BookCopyId))
-                .ForMember(dest => dest.OrderDate, opt => opt.MapFrom(src => src.OrderDate));
+                .ForMember(dest => dest.OrderDate, opt => opt.MapFrom(src => src.OrderDate))
+                .ForMember(dest => dest.Status, opt => opt.MapFrom(src => src.Status));
         }
     }
 }

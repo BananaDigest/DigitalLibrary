@@ -24,7 +24,8 @@ namespace BLL.Facade
         public Task<OrderDto> ReadOrderByIdAsync(int id);
         public Task<IEnumerable<OrderDto>> ReadOrdersByUserAsync(int userId);
         public Task CreateOrderAsync(ActionOrderDto dto);
-        public Task DeleteOrderAsync(int id);
+        public Task UpdateStatusAsync(int orderId);
+        public Task DeleteOrderAsync(int id, bool isAdmin);
         public Task<UserDto> RegisterUserAsync(UserDto dto);
         public Task<UserDto> ReadUserByIdAsync(int id);
         Task<IEnumerable<UserDto>> ReadAllUsersAsync();

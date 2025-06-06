@@ -15,5 +15,6 @@ namespace BLL.DTOs
         public int? BookCopyId { get; set; }
         public int Id { get; set; }
         public DateTime OrderDate { get; set; }
+        public OrderStatus Status { get; set; }
     }
 }
