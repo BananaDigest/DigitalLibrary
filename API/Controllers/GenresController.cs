@@ -31,7 +31,6 @@ namespace API.Controllers
         }
 
         [HttpGet("{id:int}")]
-        [AllowAnonymous]
         public async Task<IActionResult> ReadById(int id)
         {
             var genreDto = await _facade.ReadGenreByIdAsync(id);
