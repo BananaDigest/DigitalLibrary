@@ -8,7 +8,6 @@ namespace API.Controllers
 {
     [ApiController]
     [Route("api/booktypes")]
-    [Authorize]
     public class BookTypesController : ControllerBase
     {
         private readonly ILibraryFacade _facade;

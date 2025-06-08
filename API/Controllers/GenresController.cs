@@ -9,7 +9,6 @@ namespace API.Controllers
 {
     [ApiController]
     [Route("api/genres")]
-    [Authorize(Roles = "Manager,Administrator")]
     public class GenresController : ControllerBase
     {
         private readonly ILibraryFacade _facade;
@@ -42,7 +41,7 @@ namespace API.Controllers
         }
 
         [HttpPost]
-        [Authorize(Roles = "Manager")]
+        [AllowAnonymous]
         public async Task<IActionResult> Create([FromBody] GenreViewModel model)
         {
             if (!ModelState.IsValid)
@@ -54,7 +53,7 @@ namespace API.Controllers
         }
 
         [HttpPut("{id:int}")]
-        [Authorize(Roles = "Manager")]
+        [AllowAnonymous]
         public async Task<IActionResult> Update(int id, [FromBody] GenreViewModel model)
         {
             if (!ModelState.IsValid || id != model.Id)
@@ -66,7 +65,7 @@ namespace API.Controllers
         }
 
         [HttpDelete("{id:int}")]
-        [Authorize(Roles = "Manager")]
+        [AllowAnonymous]
         public async Task<IActionResult> Delete(int id)
         {
             await _facade.DeleteGenreAsync(id);

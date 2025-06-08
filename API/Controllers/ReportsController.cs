@@ -8,7 +8,6 @@ namespace API.Controllers
 {
     [ApiController]
     [Route("api/reports")]
-    [Authorize(Roles = "Manager,Administrator")]
     public class ReportsController : ControllerBase
     {
         private readonly ILibraryFacade _facade;

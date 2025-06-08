@@ -12,7 +12,6 @@ namespace API.Controllers
 {
     [ApiController]
     [Route("api/orders")]
-    [Authorize]
     public class OrdersController : ControllerBase
     {
         private readonly ILibraryFacade _facade;
@@ -25,7 +24,7 @@ namespace API.Controllers
         }
 
         [HttpGet]
-        [Authorize(Roles = "Manager,Administrator")]
+        [AllowAnonymous]
         public async Task<IActionResult> ReadAll()
         {
             var orderDtos = await _facade.ReadAllOrdersAsync();
@@ -34,7 +33,7 @@ namespace API.Controllers
         }
 
         [HttpGet("{id:int}")]
-        [Authorize(Roles = "Manager,Administrator,Registered")]
+        [AllowAnonymous]
         public async Task<IActionResult> ReadById(int id)
         {
             var currentUserId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value);
@@ -103,7 +102,7 @@ namespace API.Controllers
         }
 
         [HttpPatch("{id:int}/status")]
-        [Authorize(Roles = "Administrator")]
+        [AllowAnonymous]
         public async Task<IActionResult> UpdateStatus(int id)
         {
             try
@@ -122,7 +121,7 @@ namespace API.Controllers
         }
 
         [HttpDelete("{id:int}")]
-        [Authorize]
+        [AllowAnonymous]
         public async Task<IActionResult> Delete(int id)
         {
             var isAdmin = User.IsInRole("Administrator");

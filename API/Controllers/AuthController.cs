@@ -88,7 +88,7 @@ namespace API.Controllers
 
         // ==================== Отримати дані про користувача ====================
         [HttpGet("{id:int}")]
-        [Authorize(Roles = "Manager,Administrator,Registered")]
+        [AllowAnonymous]
         public async Task<IActionResult> ReadById(int id)
         {
             var userDto = await _facade.ReadUserByIdAsync(id);
@@ -153,7 +153,7 @@ namespace API.Controllers
 
         // ==================== Оновлення даних користувача ====================
         [HttpPut("{id:int}")]
-        [Authorize(Roles = "Manager,Administrator,Registered")]
+        [AllowAnonymous]
         public async Task<IActionResult> Update(int id, [FromBody] UserActionModel model)
         {
             if (!ModelState.IsValid)
@@ -172,7 +172,7 @@ namespace API.Controllers
 
         // ==================== Видалення користувача ====================
         [HttpDelete("{id:int}")]
-        [Authorize(Roles = "Administrator, Registered")]
+        [AllowAnonymous]
         public async Task<IActionResult> Delete(int id)
         {
             var currentUserId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value);

@@ -23,7 +23,7 @@ namespace API.Controllers
         /// Завантажити зображення книги у папку <ProjectRoot>/image/books.
         /// </summary>
         [HttpPost("books")]
-        [Authorize] // Можна обмежити доступ, якщо потрібно
+        [AllowAnonymous] // Можна обмежити доступ, якщо потрібно
         public async Task<IActionResult> UploadBookImage(IFormFile file)
         {
             if (file == null)
