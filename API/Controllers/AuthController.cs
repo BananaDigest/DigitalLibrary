@@ -105,7 +105,6 @@ namespace API.Controllers
             return Ok(result);
         }
 
-
         //[HttpGet("get-all-users")]
         //[Authorize(Roles = "Manager,Administrator, Registered")]
         //public async Task<IActionResult> ReadAll()
@@ -208,7 +207,6 @@ namespace API.Controllers
 
                 tokenIsStatic = true;
             }
-
 
             // Перевірка прав доступу
             // Доступ дозволено:
