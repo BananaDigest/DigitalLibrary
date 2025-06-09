@@ -1,0 +1,126 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<ClassDiagram MajorVersion="1" MinorVersion="1">
+  <Class Name="Tests.Services.BookServiceTests">
+    <Position X="1.75" Y="3" Width="1.5" />
+    <Compartments>
+      <Compartment Name="Nested Types" Collapsed="false" />
+    </Compartments>
+    <NestedTypes>
+      <Class Name="Tests.Services.BookServiceTests.TestAppDbContext">
+        <TypeIdentifier>
+          <NewMemberFileName>Services\BookServiceTests.cs</NewMemberFileName>
+        </TypeIdentifier>
+      </Class>
+      <Class Name="Tests.Services.BookServiceTests.TestAsyncEnumerable&lt;T&gt;">
+        <TypeIdentifier>
+          <NewMemberFileName>Services\BookServiceTests.cs</NewMemberFileName>
+        </TypeIdentifier>
+        <Lollipop Position="0.2" />
+      </Class>
+      <Class Name="Tests.Services.BookServiceTests.TestAsyncEnumerator&lt;T&gt;">
+        <TypeIdentifier>
+          <NewMemberFileName>Services\BookServiceTests.cs</NewMemberFileName>
+        </TypeIdentifier>
+        <Lollipop Position="0.2" />
+      </Class>
+      <Class Name="Tests.Services.BookServiceTests.TestAsyncQueryProvider&lt;TEntity&gt;">
+        <TypeIdentifier>
+          <NewMemberFileName>Services\BookServiceTests.cs</NewMemberFileName>
+        </TypeIdentifier>
+        <Lollipop Position="0.2" />
+      </Class>
+    </NestedTypes>
+    <TypeIdentifier>
+      <HashCode>AAIAAAAAAAABAQgQAAAAFAAAAAAAIAEAQqICAACUAAA=</HashCode>
+      <FileName>Services\BookServiceTests.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Tests.Services.BookTypeServiceTests">
+    <Position X="5.25" Y="3.25" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAACAAAAAAgAAAABCAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Services\BookTypeServiceTests.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Tests.Services.GenreServiceTests">
+    <Position X="7.25" Y="3.25" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAgAAACAAAIBAAAADABCAJAAAAAAAAAAAAQAAAAAA=</HashCode>
+      <FileName>Services\GenreServiceTests.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Tests.Services.OrderServiceTests">
+    <Position X="5.5" Y="5.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AEAAACAABAAABAgQAAQAlAgAAAAAAMMEgIACBAAAIAA=</HashCode>
+      <FileName>Services\OrderServiceTests.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Tests.Services.TestAppDbContext">
+    <Position X="7.25" Y="7" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAEAAAAAAAAAAAIAAAAAAAAAgAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Services\OrderServiceTests.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Tests.Services.UserServiceTests">
+    <Position X="3.5" Y="3" Width="1.5" />
+    <Compartments>
+      <Compartment Name="Nested Types" Collapsed="false" />
+    </Compartments>
+    <NestedTypes>
+      <Class Name="Tests.Services.UserServiceTests.TestAsyncEnumerable&lt;T&gt;">
+        <TypeIdentifier>
+          <NewMemberFileName>Services\UserServiceTests.cs</NewMemberFileName>
+        </TypeIdentifier>
+        <Lollipop Position="0.2" />
+      </Class>
+      <Class Name="Tests.Services.UserServiceTests.TestAsyncEnumerator&lt;T&gt;">
+        <TypeIdentifier>
+          <NewMemberFileName>Services\UserServiceTests.cs</NewMemberFileName>
+        </TypeIdentifier>
+        <Lollipop Position="0.2" />
+      </Class>
+      <Class Name="Tests.Services.UserServiceTests.TestAsyncQueryProvider&lt;TEntity&gt;">
+        <TypeIdentifier>
+          <NewMemberFileName>Services\UserServiceTests.cs</NewMemberFileName>
+        </TypeIdentifier>
+        <Lollipop Position="0.2" />
+      </Class>
+      <Class Name="Tests.Services.UserServiceTests.TestAppDbContext">
+        <TypeIdentifier>
+          <NewMemberFileName>Services\UserServiceTests.cs</NewMemberFileName>
+        </TypeIdentifier>
+      </Class>
+    </NestedTypes>
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAACAAAAoQABCAHAEAgAAAEAEAAEACAACBAAA=</HashCode>
+      <FileName>Services\UserServiceTests.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Tests.Services.TestAsyncQueryProvider&lt;TEntity&gt;">
+    <Position X="7.25" Y="9.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAQAAAAAgACAAAAAAAAQAAAAAAAAAEA=</HashCode>
+      <FileName>Services\OrderServiceTests.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" />
+  </Class>
+  <Class Name="Tests.Services.TestAsyncEnumerator&lt;T&gt;">
+    <Position X="9" Y="7" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAIAAAACAgABAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Services\OrderServiceTests.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" />
+  </Class>
+  <Class Name="Tests.Services.TestAsyncEnumerable&lt;T&gt;">
+    <Position X="9" Y="10" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAQAAAAAAAAAAgAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Services\OrderServiceTests.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" />
+  </Class>
+  <Font Name="Segoe UI" Size="9" />
+</ClassDiagram>

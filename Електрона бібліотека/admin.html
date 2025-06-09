@@ -1,0 +1,105 @@
+
+<!DOCTYPE html>
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+		<title>Електронна бібліотека</title>
+		<link href="cs/style.css" type="text/css" rel="stylesheet" />
+    <link rel="shortcut icon" href="image/liblary.png" type="image/png">
+    <script  type="text/javascript" src="js/scripts.js"></script>
+     <script  type="text/javascript" src="js/scripts_admin.js"></script>
+    </head>
+	<body>
+        <div class = 'header'>
+           <div class="logo"><img src="image/library-book.png" alt="Logo"></div>
+            <div class="search"><input id="searchInput" type="text" placeholder="ПОШУК"><span class="btn-search" id="searchBtn"><img src="image/loupe.png"></span></div>
+            <div class="btn-header">
+                <button class="btn1" id="btnAllIssue">Видати</button>
+                <button class="btn2"  id="btnAcceptance">Прийняти</button>
+               <button class="btn2" id="btnAllUsers">Користувачі</button>
+                <button class="btn2"  id="btnExit">Вихід</button>
+            </div>
+        </div>
+		<div class = 'wrapper'>
+         <div class="wrapper-background-cat">
+            <div class="filter-wrapper">
+                 <div class="filter1">
+                    <div class="filter-title">За типом</div>
+                    <div class="filter-text" id="typeFilterContainer"></div>
+                </div> 
+                <div class="filter2">
+                    <div class="filter-title">За жанром</div>
+                    <div class="filter-text" id="genreFilterContainer"></div>
+                </div>
+                <div class="filter3">
+                    <div class="filter-title">Видавництво</div>
+                    <div class="filter-text"id="publisherFilterContainer"></div>
+                </div>
+                <button id="resetFiltersBtn" class="btn1">Скинути фільтри</button>
+            </div>
+            <div class="product-wrapper">
+                
+            </div>
+         </div>
+        </div>
+
+
+
+
+
+  <div id="issueModal" class="modal" style="display:none;">
+  <div class="modal-content">
+    <span class="close" onclick="document.getElementById('issueModal').style.display='none'">&times;</span>
+    <h2>Список замовлень для видачі</h2>
+    <div id="issueList"></div>
+  </div>
+</div>
+
+
+
+
+<!-- Модальне вікно -->
+<div id="acceptanceModal" class="modal">
+  <div class="modal-content">
+    <span class="close" id="closeAcceptanceModal">&times;</span>
+    <h2>Повернення книги</h2>
+    <input type="text" id="bookSearchInput" placeholder="Пошук за назвою, автором, роком, видавництвом" style="width: 100%; margin-bottom: 15px; padding: 8px;">
+    <div id="acceptanceResults"></div>
+  </div>
+</div>
+
+
+
+<!-- Модальне вікно для користувачів -->
+<div id="usersModal" class="modal" style="display:none;">
+  <div class="modal-content">
+    <span class="close" id="closeUsersModal">&times;</span>
+    <h2>Видалення користувача</h2>
+    <input 
+      type="text" 
+      id="userSearchInput" 
+      placeholder="Пошук за прізвищем, ім’ям або персональним ID" 
+      style="width: 100%; margin-bottom: 15px; padding: 8px;"
+    >
+    <div id="usersResults"></div>
+  </div>
+</div>
+
+
+	
+
+
+    <!-- Модальне вікно для книги -->
+<div id="bookModal" class="modal" style="display:none;">
+  <div class="modal-content" id="bookModalContent">
+    <span class="btn-close" id="bookModalClose">&times;</span>
+    <img id="modalImage" src="" alt="Book Image" style="max-width: 200px;">
+    <h3 id="modalTitle"></h3>
+    <p><strong>Автор:</strong> <span id="modalAuthor"></span></p>
+    <p><strong>Видавництво:</strong> <span id="modalPublisher"></span></p>
+    <p><strong>Рік видання:</strong> <span id="modalYear"></span></p>
+    <p><strong>Жанр:</strong> <span id="modalGenre"></span></p>
+    <p><strong>Опис:</strong> <span id="modalDescription"></span></p>
+  </div>
+</div>
+</body>
+</html>

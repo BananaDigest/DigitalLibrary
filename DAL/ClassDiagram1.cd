@@ -1,0 +1,41 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<ClassDiagram MajorVersion="1" MinorVersion="1">
+  <Class Name="DAL.Context.DigitalLibraryContext">
+    <Position X="5.75" Y="4" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAEAACAAAAAAAAIAAAIAAAAAkAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Context\DigitalLibraryContext.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="DAL.Repositories.GenericRepository&lt;TEntity&gt;">
+    <Position X="7.5" Y="5.25" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAQAAAAAAAAABAAIEAAAIAAACAEAQAAAAAAQAIAAAAA=</HashCode>
+      <FileName>Repositories\GenericRepository.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" />
+  </Class>
+  <Class Name="DAL.UnitOfWork.UnitOfWork">
+    <Position X="4" Y="5.25" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAEAACAAACAABAIAAAIAAAAAgAAAAAAAAAAAAAgAACA=</HashCode>
+      <FileName>UnitOfWork\UnitOfWork.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" />
+  </Class>
+  <Interface Name="DAL.Repositories.IGenericRepository&lt;TEntity&gt;">
+    <Position X="7.5" Y="2.25" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAQAAAAAAAAAAAAIEAAAAAAACAEAQAAAAAAQAIAAAAA=</HashCode>
+      <FileName>Repositories\IGenericRepository.cs</FileName>
+    </TypeIdentifier>
+  </Interface>
+  <Interface Name="DAL.UnitOfWork.IUnitOfWork">
+    <Position X="4" Y="2.25" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAEAACAAAAAAAAIAAAIAAAAAgAAAAAAAAAAAAAgAACA=</HashCode>
+      <FileName>UnitOfWork\IUnitOfWork.cs</FileName>
+    </TypeIdentifier>
+  </Interface>
+  <Font Name="Segoe UI" Size="9" />
+</ClassDiagram>

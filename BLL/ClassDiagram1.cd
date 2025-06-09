@@ -1,0 +1,230 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<ClassDiagram MajorVersion="1" MinorVersion="1">
+  <Class Name="BLL.DTOs.ActionBookDto">
+    <Position X="1" Y="0.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAACAAAAAAAgIEAAiAAIAAAAAAAAAAAQAAAAAAAAABA=</HashCode>
+      <FileName>DTOs\ActionBookDto.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="BLL.DTOs.ActionOrderDto">
+    <Position X="2.5" Y="0.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>CAACCAAEAAAAAAAAAgAAAAgAAAAAAAAAAAAAAAAAAAE=</HashCode>
+      <FileName>DTOs\ActionOrderDto.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="BLL.DTOs.BookCopyDto">
+    <Position X="1" Y="3.25" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAACCAQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAIAAAAA=</HashCode>
+      <FileName>DTOs\BookCopyDto.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="BLL.DTOs.BookDto">
+    <Position X="2.5" Y="2.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAACAAAAAAAgIEAAiAIAQAAAAAAAAAARAAAAAAIAQBA=</HashCode>
+      <FileName>DTOs\BookDto.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="BLL.DTOs.BookTypeDto">
+    <Position X="1" Y="5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAACAAAAAAAAAAAAAAAAAAQAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>DTOs\BookTypeDto.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="BLL.DTOs.GenreDto">
+    <Position X="4" Y="0.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAACAAAAAAAAAAAAAAAAAAQAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>DTOs\GenreDto.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="BLL.DTOs.OrderDto">
+    <Position X="4" Y="1.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>CAACCAAEAAAAAAAAAgAAAAgAAAAAAAAAAAAAAAAAAAE=</HashCode>
+      <FileName>DTOs\OrderDto.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="BLL.DTOs.UserDto">
+    <Position X="4" Y="4" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAACAEAAACAAAAAAEAAAAAAAAAAAAAACAAAAAAAAAAg=</HashCode>
+      <FileName>DTOs\UserDto.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="BLL.Facade.LibraryFacade">
+    <Position X="7.5" Y="0.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>ABBACAAAgEBCgAAAAAxABAQQAAABAIBgAiEEEEVAABE=</HashCode>
+      <FileName>Facade\LibraryFacade.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" />
+  </Class>
+  <Class Name="BLL.Factory.BookFactory">
+    <Position X="9.5" Y="1" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAIAAAAAAAAAIAAAAA=</HashCode>
+      <FileName>Factory\BookFactory.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" />
+  </Class>
+  <Class Name="BLL.Mapping.BookDtoMappingProfile">
+    <Position X="0.75" Y="7.25" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Mapping\BookDtoMappingProfile.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="BLL.Mapping.BookTypeDtoMappingProfile">
+    <Position X="2.25" Y="7.25" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Mapping\BookTypeDtoMappingProfile.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="BLL.Mapping.GenreDtoMappingProfile">
+    <Position X="3.75" Y="7.25" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Mapping\GenreDtoMappingProfile.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="BLL.Mapping.OrderDtoMappingProfile">
+    <Position X="1.5" Y="8.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Mapping\OrderDtoMappingProfile.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="BLL.Mapping.UserDtoMappingProfile">
+    <Position X="3" Y="8.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Mapping\UserDtoMappingProfile.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="BLL.Services.BookService">
+    <Position X="11.75" Y="0.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAIAAAAAIAAABAAAAAAAIAAgAAAASAIAAAIA=</HashCode>
+      <FileName>Services\BookService.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" />
+  </Class>
+  <Class Name="BLL.Services.BookTypeService">
+    <Position X="13.25" Y="0.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAABBAAAAAAAIAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Services\BookTypeService.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" />
+  </Class>
+  <Class Name="BLL.Services.GenreService">
+    <Position X="14.75" Y="0.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAIAAABAAAAAAAIAAgAAAAQAIAAAIA=</HashCode>
+      <FileName>Services\GenreService.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" />
+  </Class>
+  <Class Name="BLL.Services.OrderService">
+    <Position X="16.25" Y="1" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAIAAABAAAAAAAIAIAACAAQAIAAAIA=</HashCode>
+      <FileName>Services\OrderService.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" />
+  </Class>
+  <Class Name="BLL.Services.UserService">
+    <Position X="14.75" Y="3.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAIAAABAAAAAAAJAAAgAAAAAABAAIA=</HashCode>
+      <FileName>Services\UserService.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" />
+  </Class>
+  <Class Name="BLL.Strategy.AuthorFilterStrategy">
+    <Position X="13.5" Y="7" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAABAAAAAAAAAAAAAAAAACAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Strategy\AuthorFilterStrategy.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" />
+  </Class>
+  <Class Name="BLL.Strategy.BookFilterContext">
+    <Position X="15" Y="7" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAQAAAAACAAAAAEAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Strategy\BookFilterContext.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="BLL.Strategy.TitleFilterStrategy">
+    <Position X="15" Y="9" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAABAAAAAAAAAAAAAAAAACAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Strategy\TitleFilterStrategy.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" />
+  </Class>
+  <Interface Name="BLL.Facade.ILibraryFacade">
+    <Position X="6" Y="0.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>ABAACAAAgEBCgAAAAAxABAQQAAABAIBgAgEAAERAABE=</HashCode>
+      <FileName>Facade\ILibraryFacade.cs</FileName>
+    </TypeIdentifier>
+  </Interface>
+  <Interface Name="BLL.Factory.IBookFactory">
+    <Position X="9.5" Y="2.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAIAAAAA=</HashCode>
+      <FileName>Factory\IBookFactory.cs</FileName>
+    </TypeIdentifier>
+  </Interface>
+  <Interface Name="BLL.Interfaces.IBookService">
+    <Position X="9.5" Y="4.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAIAAAAAIAAAAAAAAAAAAAAgAAAAQAIAAAIA=</HashCode>
+      <FileName>Interfaces\IBookService.cs</FileName>
+    </TypeIdentifier>
+  </Interface>
+  <Interface Name="BLL.Interfaces.IBookTypeService">
+    <Position X="9.5" Y="6.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAABAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Interfaces\IBookTypeService.cs</FileName>
+    </TypeIdentifier>
+  </Interface>
+  <Interface Name="BLL.Interfaces.IGenreService">
+    <Position X="11" Y="4.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAIAAAAAAAAAAAAAAgAAAAQAIAAAIA=</HashCode>
+      <FileName>Interfaces\IGenreService.cs</FileName>
+    </TypeIdentifier>
+  </Interface>
+  <Interface Name="BLL.Interfaces.IOrderService">
+    <Position X="11" Y="6.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAIAAAAAAAAAAAAAIAACAAQAIAAAIA=</HashCode>
+      <FileName>Interfaces\IOrderService.cs</FileName>
+    </TypeIdentifier>
+  </Interface>
+  <Interface Name="BLL.Interfaces.IUserService">
+    <Position X="12.5" Y="4.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAIAAAAAAAAAAABAAAgAAAAAABAAIA=</HashCode>
+      <FileName>Interfaces\IUserService.cs</FileName>
+    </TypeIdentifier>
+  </Interface>
+  <Interface Name="BLL.Strategy.IBookFilterStrategy">
+    <Position X="13.5" Y="8.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAACAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Strategy\IBookFilterStrategy.cs</FileName>
+    </TypeIdentifier>
+  </Interface>
+  <Font Name="Segoe UI" Size="9" />
+</ClassDiagram>
