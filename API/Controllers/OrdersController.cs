@@ -274,47 +274,56 @@ namespace API.Controllers
             bool isAdmin = false;
             int? currentUserId = null;
             bool tokenIsStatic = false;
-
-            // Якщо користувач автентифікований
-            if (User.Identity.IsAuthenticated)
-            {
-                var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier);
-                var roleClaim = User.FindFirst(ClaimTypes.Role);
-
-                if (userIdClaim == null || roleClaim == null)
-                    return Unauthorized(new { message = "Некоректні клейми в токені" });
-
-                currentUserId = int.Parse(userIdClaim.Value);
-                var currentRole = roleClaim.Value;
-                isAdmin = currentRole == "Administrator";
-            }
-            else
-            {
-                // Bearer token
-                var authHeader = Request.Headers["Authorization"].ToString();
-                if (string.IsNullOrEmpty(authHeader) || !authHeader.StartsWith("Bearer "))
-                    return Unauthorized(new { message = "Відсутній або неправильний токен авторизації" });
-
-                var token = authHeader.Substring("Bearer ".Length).Trim();
-                if (token != "qwerty")
-                    return Unauthorized(new { message = "Невірний токен" });
-
-                tokenIsStatic = true;
-            }
-
             try
             {
+                // Якщо користувач автентифікований
+                if (User.Identity.IsAuthenticated)
+                {
+                    var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier);
+                    var roleClaim = User.FindFirst(ClaimTypes.Role);
+
+                    if (userIdClaim == null || roleClaim == null)
+                        return Unauthorized(new { message = "Некоректні клейми в токені" });
+
+                    currentUserId = int.Parse(userIdClaim.Value);
+                    var currentRole = roleClaim.Value;
+                    isAdmin = currentRole == "Administrator";
+                }
+                else
+                {
+                    // Bearer token
+                    var authHeader = Request.Headers["Authorization"].ToString();
+                    if (string.IsNullOrEmpty(authHeader) || !authHeader.StartsWith("Bearer "))
+                        return Unauthorized(new { message = "Відсутній або неправильний токен авторизації" });
+
+                    var token = authHeader.Substring("Bearer ".Length).Trim();
+                    if (token != "qwerty")
+                        return Unauthorized(new { message = "Невірний токен" });
+
+                    tokenIsStatic = true;
+                    isAdmin = true;
+                }
                 var orderDto = await _facade.ReadOrderByIdAsync(id);
                 if (orderDto == null)
                     return NotFound();
 
+                
                 // Доступ дозволено:
                 // 1. Якщо користувач — адмін
                 // 2. Якщо користувач — власник замовлення
                 // 3. Якщо токен — статичний (qwerty)
                 if (!(isAdmin || tokenIsStatic || (currentUserId.HasValue && orderDto.UserId == currentUserId.Value)))
                     return Forbid();
-
+                //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+                //МОЖНА ТАКОЖ СПРОБУВАТИ ЦЕЙ СПОСІБ,
+                //ПРОСТО ЗАКОМЕНТУВАВШИ isAdmin = true; НА 304 РЯДКУ
+                //ТАКОЖ ЗАКОМЕНТУВАВШИ РЯДОК 326 await _facade.DeleteOrderAsync(id, isAdmin);
+                //і РОЗКОМЕНТУВАВШИ НАСТУПНІ 4 РЯДКИ (323-326)
+                //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+                //bool effectiveIsAdmin = isAdmin || tokenIsStatic;
+                //if (!(effectiveIsAdmin || (currentUserId.HasValue && orderDto.UserId == currentUserId.Value)))
+                //    return Forbid();
+                //await _facade.DeleteOrderAsync(id, effectiveIsAdmin);
                 await _facade.DeleteOrderAsync(id, isAdmin);
                 return NoContent();
             }

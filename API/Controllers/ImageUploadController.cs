@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System;
 using System.IO;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
 namespace API.Controllers
@@ -23,36 +24,39 @@ namespace API.Controllers
         /// Завантажити зображення книги у папку <ProjectRoot>/image/books.
         /// </summary>
         [HttpPost("books")]
-        [AllowAnonymous] // Можна обмежити доступ, якщо потрібно
-        public async Task<IActionResult> UploadBookImage(IFormFile file)
+        [AllowAnonymous]
+        public async Task<IActionResult> UploadBookImage(
+            IFormFile file,
+            [FromForm] string bookName)
         {
             if (file == null)
                 return BadRequest(new { message = "Файл не передано." });
+
+            if (string.IsNullOrWhiteSpace(bookName))
+                return BadRequest(new { message = "Назва книги не вказана." });
 
             // Дозволені розширення
             var permittedExtensions = new[] { ".jpg", ".jpeg", ".png", ".gif" };
             var extension = Path.GetExtension(file.FileName).ToLowerInvariant();
             if (string.IsNullOrEmpty(extension) || Array.IndexOf(permittedExtensions, extension) < 0)
-            {
                 return BadRequest(new { message = "Непідтримуване розширення файлу." });
-            }
 
-            // ContentRootPath → корінь проєкту (де лежить .csproj)
+            // Санітизуємо назву книги
+            var safeBookName = Regex.Replace(bookName.Trim(), @"[^\w\-]", "_");
+
+            // Кінцева папка: <ProjectRoot>/image/books
             var projectRoot = _env.ContentRootPath;
-            // Папка image/books у корені
             var targetFolder = Path.Combine(projectRoot, "image", "books");
-
             if (!Directory.Exists(targetFolder))
-            {
                 Directory.CreateDirectory(targetFolder);
-            }
 
-            // Унікальне ім'я файлу
-            var uniqueFileName = $"{Guid.NewGuid()}{extension}";
-            var fullPath = Path.Combine(targetFolder, uniqueFileName);
+            // Ім’я файлу – за назвою книги
+            var fileName = $"{safeBookName}{extension}";
+            var fullPath = Path.Combine(targetFolder, fileName);
 
             try
             {
+                // Перезаписуємо, якщо файл існує
                 await using var stream = new FileStream(fullPath, FileMode.Create);
                 await file.CopyToAsync(stream);
             }
@@ -62,16 +66,16 @@ namespace API.Controllers
                     new { message = "Помилка збереження файлу", detail = ex.Message });
             }
 
-            // Якщо потім потрібно віддавати файл як статичний, можна сформувати URL.
-            // Наприклад, якщо ми додатково налаштуємо StaticFiles так, щоб сервити /image.
+            // Формуємо публічний URL
             var request = HttpContext.Request;
             var baseUrl = $"{request.Scheme}://{request.Host}";
-            var fileUrl = $"{baseUrl}/image/books/{uniqueFileName}";
+            var fileUrl = $"{baseUrl}/image/books/{fileName}";
 
             return Ok(new
             {
                 message = "Файл успішно завантажено.",
-                fileName = uniqueFileName,
+                bookName = bookName,
+                fileName = fileName,
                 url = fileUrl
             });
         }
