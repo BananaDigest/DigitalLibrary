@@ -52,6 +52,7 @@ namespace API.Controllers
 
             // Ім’я файлу – за назвою книги
             var fileName = $"{safeBookName}{extension}";
+            //var fileName = Path.GetFileName(file.FileName);
             var fullPath = Path.Combine(targetFolder, fileName);
 
             try

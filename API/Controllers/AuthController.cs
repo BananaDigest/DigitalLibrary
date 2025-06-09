@@ -173,16 +173,80 @@ namespace API.Controllers
         // ==================== Видалення користувача ====================
         [HttpDelete("{id:int}")]
         [AllowAnonymous]
+
+
         public async Task<IActionResult> Delete(int id)
         {
-            var currentUserId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value);
-            var currentRole = User.FindFirst(ClaimTypes.Role)?.Value;
+            bool isAdmin = false;
+            int? currentUserId = null;
+            bool tokenIsStatic = false;
 
-            if (currentRole != "Administrator" && currentUserId != id)
-                return Forbid(); // 403
-            await _facade.DeleteUserAsync(id);
-            return NoContent();
+            // Якщо користувач автентифікований
+            if (User.Identity.IsAuthenticated)
+            {
+                var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier);
+                var roleClaim = User.FindFirst(ClaimTypes.Role);
+
+                if (userIdClaim == null || roleClaim == null)
+                    return Unauthorized(new { message = "Некоректні клейми в токені" });
+
+                currentUserId = int.Parse(userIdClaim.Value);
+                var currentRole = roleClaim.Value;
+                isAdmin = currentRole == "Administrator";
+            }
+            else
+            {
+                // Bearer token
+                var authHeader = Request.Headers["Authorization"].ToString();
+                if (string.IsNullOrEmpty(authHeader) || !authHeader.StartsWith("Bearer "))
+                    return Unauthorized(new { message = "Відсутній або неправильний токен авторизації" });
+
+                var token = authHeader.Substring("Bearer ".Length).Trim();
+                if (token != "qwerty")
+                    return Unauthorized(new { message = "Невірний токен" });
+
+                tokenIsStatic = true;
+            }
+
+            // Перевірка прав доступу
+            // Доступ дозволено:
+            // 1. Якщо користувач — адмін
+            // 2. Якщо користувач видаляє себе
+            // 3. Якщо токен — статичний (qwerty)
+            if (!(isAdmin || tokenIsStatic || (currentUserId.HasValue && currentUserId.Value == id)))
+                return Forbid();
+
+            try
+            {
+                await _facade.DeleteUserAsync(id);
+                return NoContent();
+            }
+            catch (UnauthorizedAccessException)
+            {
+                return Forbid();
+            }
+            catch (KeyNotFoundException)
+            {
+                return NotFound();
+            }
+            catch (Exception ex)
+            {
+                // Логування можна додати тут
+                return StatusCode(500, new { message = "Внутрішня помилка сервера при видаленні користувача." });
+            }
         }
+        //[HttpDelete("{id:int}")]
+        //[AllowAnonymous]
+        //public async Task<IActionResult> Delete(int id)
+        //{
+        //    var currentUserId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value);
+        //    var currentRole = User.FindFirst(ClaimTypes.Role)?.Value;
+
+        //    if (currentRole != "Administrator" && currentUserId != id)
+        //        return Forbid(); // 403
+        //    await _facade.DeleteUserAsync(id);
+        //    return NoContent();
+        //}
 
         // ==================== Access Denied ====================
         [HttpGet("denied")]
