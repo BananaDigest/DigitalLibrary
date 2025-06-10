@@ -20,9 +20,6 @@ namespace API.Controllers
             _env = env;
         }
 
-        /// <summary>
-        /// Завантажити зображення книги у папку <ProjectRoot>/image/books.
-        /// </summary>
         [HttpPost("books")]
         [AllowAnonymous]
         public async Task<IActionResult> UploadBookImage(
@@ -41,7 +38,6 @@ namespace API.Controllers
             if (string.IsNullOrEmpty(extension) || Array.IndexOf(permittedExtensions, extension) < 0)
                 return BadRequest(new { message = "Непідтримуване розширення файлу." });
 
-            // Санітизуємо назву книги
             var safeBookName = Regex.Replace(bookName.Trim(), @"[^\w\-]", "_");
 
             // Кінцева папка: <ProjectRoot>/image/books
@@ -51,8 +47,7 @@ namespace API.Controllers
                 Directory.CreateDirectory(targetFolder);
 
             // Ім’я файлу – за назвою книги
-            var fileName = $"{safeBookName}{extension}";
-            //var fileName = Path.GetFileName(file.FileName);
+            var fileName = Path.GetFileName(file.FileName);
             var fullPath = Path.Combine(targetFolder, fileName);
 
             try
@@ -67,7 +62,6 @@ namespace API.Controllers
                     new { message = "Помилка збереження файлу", detail = ex.Message });
             }
 
-            // Формуємо публічний URL
             var request = HttpContext.Request;
             var baseUrl = $"{request.Scheme}://{request.Host}";
             var fileUrl = $"{baseUrl}/image/books/{fileName}";

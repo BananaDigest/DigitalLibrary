@@ -41,9 +41,9 @@ namespace BLL.Services
         public async Task<BookDto> ReadByIdAsync(int id)
         {
             var bookEntity = await _uow.Books
-                .ReadAll()                           // IQueryable<Book>
-                .Include(b => b.AvailableTypes)     // підвантажуємо join-колекцію
-                .Include(b => b.Copies)             // підвантажуємо копії
+                .ReadAll()                         
+                .Include(b => b.AvailableTypes)   
+                .Include(b => b.Copies)             
                 .Include(b => b.Genre)
                 .FirstOrDefaultAsync(b => b.Id == id);
 
@@ -55,7 +55,6 @@ namespace BLL.Services
 
         public async Task<List<BookDto>> ReadByTypeAsync(int typeId)
         {
-            // Повертаємо всі книги, в яких колекція AvailableTypes містить певний typeId
             var entities = await _uow.Books
                 .ReadAll()
                 .Include(b => b.AvailableTypes)
@@ -70,7 +69,7 @@ namespace BLL.Services
         {
             var bookEntity = _mapper.Map<Book>(dto);
 
-            // 2) Створюємо навігаційну колекцію AvailableTypes
+            // Створюємо навігаційну колекцію AvailableTypes
             bookEntity.AvailableTypes = new List<BookTypeEntity>();
             foreach (var typeId in dto.AvailableTypeIds.Distinct())
             {
@@ -79,7 +78,7 @@ namespace BLL.Services
                 bookEntity.AvailableTypes.Add(typeEntity);
             }
 
-            // 3) Створюємо копії лише якщо є паперовий тип
+            // Створюємо копії лише якщо є паперовий тип
             bookEntity.Copies = new List<BookCopy>();
             if (dto.AvailableTypeIds.Contains((int)BookType.Paper))
             {
@@ -94,7 +93,6 @@ namespace BLL.Services
                 }
             }
 
-            // 4) Додаємо та зберігаємо
             await _uow.Books.CreateAsync(bookEntity);
             await _uow.CommitAsync();
         }
@@ -102,7 +100,7 @@ namespace BLL.Services
         public async Task UpdateAsync(int bookId, ActionBookDto dto)
         {
             var bookEntity = await _uow.Books
-        .ReadAll() // припускаємо, що ReadAll() повертає IQueryable<Book>
+        .ReadAll() 
         .Include(b => b.AvailableTypes)
         .Include(b => b.Copies)
         .FirstOrDefaultAsync(b => b.Id == bookId);
@@ -110,7 +108,7 @@ namespace BLL.Services
             if (bookEntity == null)
                 throw new KeyNotFoundException($"Book with Id = {bookId} not found.");
 
-            // 2) Оновлюємо основні поля
+            // Оновлюємо основні поля
             bookEntity.Title = dto.Title;
             bookEntity.Author = dto.Author;
             bookEntity.Publisher = dto.Publisher;
@@ -122,7 +120,7 @@ namespace BLL.Services
             bookEntity.AvailableCopies = dto.CopyCount;
             bookEntity.Description = dto.Description;
 
-            // 5) Оновлюємо AvailableTypes (як раніше)
+            // Оновлюємо AvailableTypes (як раніше)
             var toRemove = bookEntity.AvailableTypes
                 .Where(bt => !dto.AvailableTypeIds.Contains(bt.Id))
                 .ToList();
@@ -141,7 +139,7 @@ namespace BLL.Services
                 bookEntity.AvailableTypes.Add(typeEntity);
             }
 
-            // 6) Оновлюємо Copies (повністю очищаємо старі → додаємо нові)
+            // Оновлюємо Copies (повністю очищаємо старі -> додаємо нові)
             bookEntity.Copies.Clear();
             if (dto.AvailableTypeIds.Contains((int)BookType.Paper))
             {
@@ -156,7 +154,6 @@ namespace BLL.Services
                 }
             }
 
-            // 7) Зберігаємо зміни
             await _uow.CommitAsync();
         }
 

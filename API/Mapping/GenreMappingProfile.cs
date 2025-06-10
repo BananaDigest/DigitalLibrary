@@ -13,10 +13,10 @@ namespace API.Mapping
     {
         public GenreMappingProfile()
         {
-            // GenreViewModel → GenreDto
+            // GenreViewModel -> GenreDto
             CreateMap<GenreViewModel, GenreDto>();
 
-            // GenreDto → GenreViewModel
+            // GenreDto -> GenreViewModel
             CreateMap<GenreDto, GenreViewModel>();
         }
     }

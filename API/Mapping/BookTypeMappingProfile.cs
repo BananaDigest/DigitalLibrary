@@ -13,7 +13,7 @@ namespace API.Mapping
     {
         public BookTypeMappingProfile()
         {
-            // BookTypeDto → BookTypeViewModel
+            // BookTypeDto -> BookTypeViewModel
             CreateMap<BookTypeDto, BookTypeViewModel>();
         }
     }

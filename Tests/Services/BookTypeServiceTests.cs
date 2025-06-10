@@ -24,12 +24,12 @@ namespace Tests.Services
         [SetUp]
         public void Setup()
         {
-            // 1) Мок IUnitOfWork і його BookTypes-репозиторій
+            //Мок IUnitOfWork і його BookTypes-репозиторій
             var uowMock = Substitute.For<IUnitOfWork>();
             var typeRepoMock = Substitute.For<IGenericRepository<BookTypeEntity>>();
             uowMock.BookTypes.Returns(typeRepoMock);
 
-            // 2) Приклад доменних BookTypeEntity
+            //Приклад доменних BookTypeEntity
             var domainTypes = new List<BookTypeEntity>
             {
                 new BookTypeEntity { Id = 1, Name = "Electronic" },
@@ -41,7 +41,7 @@ namespace Tests.Services
             typeRepoMock.ReadAllAsync().Returns(Task.FromResult<IEnumerable<BookTypeEntity>>(domainTypes));
 
 
-            // 3) Мок IMapper
+            //Мок IMapper
             var mapperMock = Substitute.For<IMapper>();
             // ―― Мапінг одиничної сутності ――
             foreach (var t in domainTypes)
@@ -61,7 +61,7 @@ namespace Tests.Services
                 });
 
 
-            // 4) Будуємо Autofac-контейнер
+            //Будуємо Autofac-контейнер
             var builder = new ContainerBuilder();
             builder.RegisterInstance(uowMock).As<IUnitOfWork>().SingleInstance();
             builder.RegisterInstance(mapperMock).As<IMapper>().SingleInstance();

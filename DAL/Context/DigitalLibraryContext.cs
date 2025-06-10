@@ -37,13 +37,13 @@ namespace DAL.Context
                     .ValueGeneratedOnAdd()  // авто-інкремент
                     .UseIdentityColumn();   // SQL Server Identity
 
-                // Book → BookCopies — Cascade OK
+                // Book -> BookCopies — Cascade OK
                 b.HasMany(x => x.Copies)
                  .WithOne(c => c.Book)
                  .HasForeignKey(c => c.BookId)
                  .OnDelete(DeleteBehavior.Cascade);
 
-                // Book → Genre — Restrict
+                // Book -> Genre — Restrict
                 b.HasOne(x => x.Genre)
                  .WithMany(g => g.Books)
                  .HasForeignKey(x => x.GenreId)
@@ -73,7 +73,7 @@ namespace DAL.Context
                     .ValueGeneratedOnAdd()
                     .UseIdentityColumn();
 
-                // User → Orders — Cascade
+                // User -> Orders — Cascade
                 u.HasMany(x => x.Orders)
                  .WithOne(o => o.User)
                  .HasForeignKey(o => o.UserId)
@@ -87,13 +87,13 @@ namespace DAL.Context
                     .ValueGeneratedOnAdd()
                     .UseIdentityColumn();
 
-                // Order → Book — Restrict
+                // Order -> Book — Restrict
                 o.HasOne(x => x.Book)
                  .WithMany()
                  .HasForeignKey(x => x.BookId)
                  .OnDelete(DeleteBehavior.Restrict);
 
-                // Order → BookCopy — SetNull
+                // Order -> BookCopy — SetNull
                 o.HasOne(x => x.BookCopy)
                  .WithMany()
                  .HasForeignKey(x => x.BookCopyId)

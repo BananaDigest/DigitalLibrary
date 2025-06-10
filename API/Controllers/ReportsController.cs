@@ -20,7 +20,7 @@ namespace API.Controllers
         [HttpGet("paper-availability")]
         public async Task<IActionResult> ReadPaperAvailability()
         {
-            var books = await _facade.ReadAllBooksAsync();
+            var books = await _facade.ReadAllBooksAsync();//books
             var report = books.Select(b => new
             {
                 b.Id,
@@ -34,7 +34,7 @@ namespace API.Controllers
         [HttpGet("paper-orders")]
         public async Task<IActionResult> ReadPaperOrdersReport()
         {
-            var orders = await _facade.ReadAllOrdersAsync();
+            var orders = await _facade.ReadAllOrdersAsync();//orders
             var paperOrders = orders
                 .Where(o => o.OrderType == Domain.Enums.BookType.Paper)
                 .GroupBy(o => o.BookId)
@@ -49,7 +49,7 @@ namespace API.Controllers
         [HttpGet("digital-metrics")]
         public async Task<IActionResult> ReadDigitalMetrics()
         {
-            var books = await _facade.ReadAllBooksAsync();
+            var books = await _facade.ReadAllBooksAsync();//books
             var metrics = books.Select(b => new
             {
                 b.Id,

@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link rel="shortcut icon" href="image/liblary.png" type="image/png">
+<title>Звітність</title>
+<style>
+  body { font-family: Arial, sans-serif; padding: 20px; }
+  table { border-collapse: collapse; width: 100%; margin-bottom: 40px; }
+  th, td { border: 1px solid #ccc; padding: 8px; text-align: left; }
+  th { background: #eee; }
+  button { margin-right: 10px; }
+  .bnt1{ font-size: 20px; padding: 10px 15px; border-radius: 20px; cursor: pointer;}
+</style>
+</head>
+<body>
+
+<h1>Звітність</h1>
+
+<button id="btnBack" class="bnt1">Назад</button>
+<button id="btnExit" class="bnt1">Вихід</button>
+
+<h2>Паперові книжки</h2>
+<table id="paperBooksTable">
+  <thead>
+    <tr>
+      <th>Назва</th>
+      <th>Автор</th>
+      <th>Рік</th>
+      <th>Видавництво</th>
+      <th>Доступно зараз</th>
+      <th>Початкова кількість</th>
+    </tr>
+  </thead>
+  <tbody></tbody>
+</table>
+
+<h2>Паперові замовлення</h2>
+<table id="paperOrdersTable">
+  <thead>
+    <tr>
+      <th>Назва</th>
+      <th>Автор</th>
+      <th>Рік</th>
+      <th>Видавництво</th>
+      <th>Кількість замовлень</th>
+    </tr>
+  </thead>
+  <tbody></tbody>
+</table>
+
+<h2>Електронні замовлення</h2>
+<table id="digitalMetricsTable">
+  <thead>
+    <tr>
+      <th>Назва</th>
+      <th>Автор</th>
+      <th>Рік</th>
+      <th>Видавництво</th>
+      <th>Завантаження (електронні)</th>
+      <th>Відтворення аудіо</th>
+    </tr>
+  </thead>
+  <tbody></tbody>
+</table>
+
+<script>
+  const token = localStorage.getItem("token"); // якщо потрібен токен
+
+  // Функція для отримання даних книги за id
+  async function fetchBookDetails(id) {
+    try {
+        const res = await fetch(`http://localhost:5278/api/books/${id}`, {
+        headers: {
+          "Authorization": "Bearer " + token
+        }
+      });
+      if (!res.ok) throw new Error("Не вдалося завантажити книгу");
+      return await res.json();
+    } catch (err) {
+      console.error(err);
+      return null;
+    }
+  }
+
+  // Завантаження і відображення паперових книжок
+  async function loadPaperBooks() {
+      const res = await fetch("http://localhost:5278/api/reports/paper-availability", {
+      headers: { "Authorization": "Bearer " + token }
+    });
+    if (!res.ok) throw new Error("Не вдалося завантажити паперові книжки");
+    const books = await res.json();
+    const tbody = document.querySelector("#paperBooksTable tbody");
+    tbody.innerHTML = "";
+
+    for (const book of books) {
+      const details = await fetchBookDetails(book.id);
+      const tr = document.createElement("tr");
+      tr.innerHTML = `
+        <td>${book.title}</td>
+        <td>${details?.author || "-"}</td>
+        <td>${details?.publicationYear || "-"}</td>
+        <td>${details?.publisher || "-"}</td>
+        <td>${book.availableNow}</td>
+        <td>${book.initialTotal}</td>
+      `;
+      tbody.appendChild(tr);
+    }
+  }
+
+  // Завантаження і відображення паперових замовлень
+  async function loadPaperOrders() {
+      const res = await fetch("http://localhost:5278/api/reports/paper-orders", {
+      headers: { "Authorization": "Bearer " + token }
+    });
+    if (!res.ok) throw new Error("Не вдалося завантажити паперові замовлення");
+    const orders = await res.json();
+    const tbody = document.querySelector("#paperOrdersTable tbody");
+    tbody.innerHTML = "";
+
+    for (const order of orders) {
+      const details = await fetchBookDetails(order.bookId);
+      const tr = document.createElement("tr");
+      tr.innerHTML = `
+        <td>${details?.title || "-"}</td>
+        <td>${details?.author || "-"}</td>
+        <td>${details?.publicationYear || "-"}</td>
+        <td>${details?.publisher || "-"}</td>
+        <td>${order.count}</td>
+      `;
+      tbody.appendChild(tr);
+    }
+  }
+
+  // Завантаження і відображення електронних замовлень
+  async function loadDigitalMetrics() {
+      const res = await fetch("http://localhost:5278/api/reports/digital-metrics", {
+      headers: { "Authorization": "Bearer " + token }
+    });
+    if (!res.ok) throw new Error("Не вдалося завантажити електронні замовлення");
+    const metrics = await res.json();
+    const tbody = document.querySelector("#digitalMetricsTable tbody");
+    tbody.innerHTML = "";
+
+    for (const metric of metrics) {
+      const details = await fetchBookDetails(metric.id);
+      const tr = document.createElement("tr");
+      tr.innerHTML = `
+        <td>${metric.title}</td>
+        <td>${details?.author || "-"}</td>
+        <td>${details?.publicationYear || "-"}</td>
+        <td>${details?.publisher || "-"}</td>
+        <td>${metric.electronicDownloads}</td>
+        <td>${metric.audioPlays}</td>
+      `;
+      tbody.appendChild(tr);
+    }
+  }
+
+  // Обробники кнопок
+  document.getElementById("btnBack").addEventListener("click", () => {
+   window.location.href = "manager.html"
+  });
+
+  document.getElementById("btnExit").addEventListener("click", () => {
+    window.location.href = 'index.html'; 
+  });
+
+
+
+
+  // Запуск завантаження даних при завантаженні сторінки
+  (async () => {
+    try {
+      await loadPaperBooks();
+      await loadPaperOrders();
+      await loadDigitalMetrics();
+    } catch (err) {
+      alert("Сталася помилка при завантаженні звітності: " + err.message);
+    }
+  })();
+</script>
+
+</body>
+</html>

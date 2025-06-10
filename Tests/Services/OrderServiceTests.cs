@@ -34,11 +34,11 @@ namespace Tests.Services
         [SetUp]
         public void SetUp()
         {
-            // 1) Налаштовуємо AutoFixture з AutoNSubstituteCustomization
+            // Налаштовуємо AutoFixture з AutoNSubstituteCustomization
             _fixture = new Fixture().Customize(new AutoNSubstituteCustomization { ConfigureMembers = true });
 
             _uowMock = Substitute.For<IUnitOfWork>();
-            // 2) Мок IUnitOfWork і репозиторій Orders
+            // Мок IUnitOfWork і репозиторій Orders
             _uowMock = _fixture.Freeze<IUnitOfWork>();
             var ordersRepoMock = Substitute.For<IGenericRepository<Order>>();
             _uowMock.Orders.Returns(ordersRepoMock);
@@ -47,7 +47,7 @@ namespace Tests.Services
             _uowMock.Books.Returns(Substitute.For<IGenericRepository<Book>>());
 
 
-            // 4) Мок IMapper: Map<List<OrderDto>>(List<Order>) → List<OrderDto>
+            // Мок IMapper: Map<List<OrderDto>>(List<Order>) -> List<OrderDto>
             _mapperMock = Substitute.For<AutoMapper.IMapper>();
             _mapperMock
                 .Map<List<OrderDto>>(Arg.Any<List<Order>>())
@@ -65,10 +65,10 @@ namespace Tests.Services
                     }).ToList();
                 });
 
-            // 5) Створюємо сам сервіс
+            //Створюємо сам сервіс
             _service = new OrderService(_uowMock, _mapperMock);
 
-            // 5) Налаштовуємо InMemory DbContext (роздільна база для кожного тесту)
+            // Налаштовуємо InMemory DbContext (роздільна база для кожного тесту)
             var options = new DbContextOptionsBuilder<TestAppDbContext>()
                 .UseInMemoryDatabase(Guid.NewGuid().ToString())
                 .Options;
@@ -115,10 +115,10 @@ namespace Tests.Services
                 }
             };
 
-            // 1) Перетворюємо у асинхронний IQueryable
+            // Перетворюємо у асинхронний IQueryable
             var asyncOrders = new TestAsyncEnumerable<Order>(domainOrders);
 
-            // 2) Налаштовуємо репозиторій
+            // Налаштовуємо репозиторій
             _uowMock.Orders.ReadAllOrder().Returns(asyncOrders);
 
             // Act
@@ -142,7 +142,7 @@ namespace Tests.Services
         }
 
         // ----------------------------------------------
-        // Тест 2: порожня колекція → повернення пустого списку
+        // Тест 2: порожня колекція -> повернення пустого списку
         // ----------------------------------------------
         [Test]
         public async Task ReadAllAsync_WhenNoOrders_ReturnsEmptyList()
@@ -213,7 +213,7 @@ namespace Tests.Services
         }
 
         // -------------------------------------------------------------------
-        // Тест 3: ReadAllOrder() повертає null → NullReferenceException
+        // Тест 3: ReadAllOrder() повертає null -> NullReferenceException
         // -------------------------------------------------------------------
         [Test]
         public void ReadByIdAsync_WhenReadAllOrderReturnsNull_ThrowsNullReferenceException()
@@ -272,7 +272,7 @@ namespace Tests.Services
             }
         };
 
-            // «Фейковий» IQueryable<Order> зі всіма замовленнями
+            // Фейковий IQueryable<Order> зі всіма замовленнями
             var asyncOrders = new TestAsyncEnumerable<Order>(domainOrders);
             _uowMock.Orders.ReadAllOrder().Returns(asyncOrders);
 
@@ -299,7 +299,7 @@ namespace Tests.Services
 
 
         // ---------------------------------------------------
-        // Тест #4: Якщо Book не знайдено → KeyNotFoundException
+        // Тест #4: Якщо Book не знайдено -> KeyNotFoundException
         // ---------------------------------------------------
         [Test]
         public void CreateAsync_BookNotFound_ThrowsKeyNotFoundException()
@@ -324,7 +324,7 @@ namespace Tests.Services
 
 
         // ---------------------------------------------------
-        // Тест #5: Якщо немає вільних Paper-копій → InvalidOperationException
+        // Тест #5: Якщо немає вільних Paper-копій -> InvalidOperationException
         // ---------------------------------------------------
         [Test]
         public void CreateAsync_PaperType_NoFreeCopies_ThrowsInvalidOperationException()
@@ -386,7 +386,7 @@ namespace Tests.Services
         public async Task DeleteAsync_StatusAwaiting_NonAdmin_DeletesOrder()
         {
             // Arrange:
-            // 1) Створюємо Book зі всіма обов’язковими властивостями
+            // Створюємо Book зі всіма обов’язковими властивостями
             var book = new Book
             {
                 Id = 5,
@@ -398,7 +398,7 @@ namespace Tests.Services
             };
             _inMemoryContext.Books.Add(book);
 
-            // 2) Створюємо Order у статусі Awaiting (без паперової копії)
+            // Створюємо Order у статусі Awaiting (без паперової копії)
             var order = new Order
             {
                 Id = 1,
@@ -412,7 +412,7 @@ namespace Tests.Services
             _inMemoryContext.Orders.Add(order);
             _inMemoryContext.SaveChanges();
 
-            // 3) Підміна ReadAllOrder() → In-Memory Orders
+            // Підміна ReadAllOrder() → In-Memory Orders
             StubReadAllOrderToReturnInMemoryOrders();
 
             // Act:
@@ -427,7 +427,7 @@ namespace Tests.Services
         public void DeleteAsync_StatusWithUser_NonAdmin_ThrowsUnauthorizedAccessException()
         {
             // Arrange:
-            // 1) Створюємо Book зі всіма обов’язковими властивостями
+            // Створюємо Book зі всіма обов’язковими властивостями
             var book = new Book
             {
                 Id = 7,
@@ -439,7 +439,7 @@ namespace Tests.Services
             };
             _inMemoryContext.Books.Add(book);
 
-            // 2) Створюємо Order у статусі WithUser (без паперової копії)
+            // Створюємо Order у статусі WithUser (без паперової копії)
             var order = new Order
             {
                 Id = 2,
@@ -453,7 +453,7 @@ namespace Tests.Services
             _inMemoryContext.Orders.Add(order);
             _inMemoryContext.SaveChanges();
 
-            // 3) Підміна ReadAllOrder() → In-Memory Orders
+            // Підміна ReadAllOrder() → In-Memory Orders
             StubReadAllOrderToReturnInMemoryOrders();
 
             // Act & Assert:
@@ -468,7 +468,7 @@ namespace Tests.Services
         public async Task DeleteAsync_StatusWithUser_AdminDeletesAndFreesCopy()
         {
             // Arrange:
-            // 1) Створюємо Book та BookCopy зі всіма обов’язковими параметрами
+            // Створюємо Book та BookCopy зі всіма обов’язковими параметрами
             var book = new Book
             {
                 Id = 30,
@@ -487,7 +487,7 @@ namespace Tests.Services
             };
             _inMemoryContext.BookCopies.Add(copy);
 
-            // 2) Створюємо Order у статусі WithUser із паперовою копією
+            // Створюємо Order у статусі WithUser із паперовою копією
             var order = new Order
             {
                 Id = 3,
@@ -501,16 +501,16 @@ namespace Tests.Services
             _inMemoryContext.Orders.Add(order);
             _inMemoryContext.SaveChanges();
 
-            // 3) Підміна ReadAllOrder() → In-Memory Orders
+            // Підміна ReadAllOrder() → In-Memory Orders
             StubReadAllOrderToReturnInMemoryOrders();
 
             // Act:
             await _service.DeleteAsync(orderId: 3, isAdmin: true);
 
             // Assert:
-            // • Копія стала вільною
+            // Копія стала вільною
             copy.IsAvailable.Should().BeTrue();
-            // • AvailableCopies книги інкрементовано
+            // AvailableCopies книги інкрементовано
             book.AvailableCopies.Should().Be(1);
 
             _uowMock.BookCopies.Received(1).Update(copy);
@@ -586,7 +586,7 @@ namespace Tests.Services
         // HELPERS: Кілька приватних методів, щоб не дублювати код
         // ===========================================================
 
-        // Підставляє _uowMock.Orders.ReadAllOrder() → In-Memory DbSet<Order>
+        // Підставляє _uowMock.Orders.ReadAllOrder() -> In-Memory DbSet<Order>
         private void StubReadAllOrderToReturnInMemoryOrders()
         {
             // Нам потрібно, щоб GenericRepository<Order>.ReadAllOrder() повертав IQueryable<Order>,
@@ -666,14 +666,14 @@ namespace Tests.Services
         {
             if (expression is MethodCallExpression mce)
             {
-                // 1) Drop Include(...)
+                // Drop Include(...)
                 if (mce.Method.DeclaringType == typeof(EntityFrameworkQueryableExtensions)
                     && mce.Method.Name.StartsWith("Include", StringComparison.Ordinal))
                 {
                     return StripEfMethods(mce.Arguments[0]);
                 }
 
-                // 2) Transform FirstOrDefaultAsync(...) → Queryable.FirstOrDefault(...)
+                // Transform FirstOrDefaultAsync(...) -> Queryable.FirstOrDefault(...)
                 if (mce.Method.DeclaringType == typeof(EntityFrameworkQueryableExtensions)
                     && mce.Method.Name == nameof(EntityFrameworkQueryableExtensions.FirstOrDefaultAsync))
                 {
@@ -696,7 +696,7 @@ namespace Tests.Services
                     return firstCall;
                 }
 
-                // 3) Інші студентські виклики – лише рекурсивно обробляємо аргументи
+                // Інші студентські виклики – лише рекурсивно обробляємо аргументи
                 var newArgs = mce.Arguments.Select(arg => StripEfMethods(arg)).ToArray();
                 var newObj = mce.Object != null ? StripEfMethods(mce.Object) : null;
                 return mce.Update(newObj, newArgs);
@@ -716,7 +716,6 @@ namespace Tests.Services
 
         public DbSet<Book> Books { get; set; } = null!;
         public DbSet<BookCopy> BookCopies { get; set; } = null!;
-        // Якщо потрібно, додайте інші DbSet, але для цих тестів достатньо двох
         public DbSet<Order> Orders { get; set; } = null!;
     }
 }

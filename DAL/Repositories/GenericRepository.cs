@@ -38,12 +38,6 @@ namespace DAL.Repositories
             return await _dbSet.ToListAsync();
         }
 
-
-        //public async Task<IEnumerable<TEntity>> ReadAllAsync()
-        //{
-        //    return await _dbSet.ToListAsync();
-        //}
-
         public async Task<IEnumerable<TEntity>> FindAsync(Expression<Func<TEntity, bool>> predicate)
         {
             return await _dbSet.Where(predicate).ToListAsync();

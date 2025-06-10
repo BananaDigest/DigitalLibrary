@@ -32,7 +32,6 @@ namespace BLL.Factory
                 PublicationYear = dto.PublicationYear,
                 GenreId = dto.GenreId,
                 AvailableTypes = new List<BookTypeEntity>()
-                // Залишаємо AvailableTypes і Copies для заповнення далі
             };
 
             // 2) Завантажуємо Genre з БД, щоби EF мав єдиний екземпляр
@@ -68,7 +67,6 @@ namespace BLL.Factory
                     });
                 }
             }
-
             return book;
         }
     }

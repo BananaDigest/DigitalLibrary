@@ -9,8 +9,8 @@ namespace Domain.Enums
     public enum OrderStatus
     {
         NoPaper = 0,
-        Awaiting = 1,   // “Чекає у пункті видачі”
-        WithUser = 2    // “У користувача”
+        Awaiting = 1, 
+        WithUser = 2 
     }
 }
 

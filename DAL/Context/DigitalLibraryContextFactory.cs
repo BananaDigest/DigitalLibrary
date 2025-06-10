@@ -10,22 +10,19 @@ namespace DAL.Context
         public DigitalLibraryContext CreateDbContext(string[] args)
         {
             var solutionFolder = Directory.GetCurrentDirectory();
-            // припустимо: .../DigitalLibrary/DAL    (бо цей клас у DAL)
             var projectRoot = Path.GetFullPath(Path.Combine(solutionFolder, "../API"));
             var appDataFolder = Path.Combine(projectRoot, "App_Data");
 
-            // 2) Якщо папки App_Data ще немає (скажімо, перший запуск), створюємо
+            // Якщо папки App_Data ще немає створюємо
             if (!Directory.Exists(appDataFolder))
             {
                 Directory.CreateDirectory(appDataFolder);
             }
 
-            // 3) Файл бази тепер лежить у API/App_Data/DigitalLibraryDB.mdf
+            //Файл бази лежить у API/App_Data/DigitalLibraryDB.mdf
             var mdfPath = Path.Combine(appDataFolder, "DigitalLibraryDB.mdf");
 
-            // 4) Формуємо рядок підключення з AttachDbFilename 
-            //    (сьогодні при LocalDB досить Trusted_Connection=True).
-            //    Обов’язково додаємо «Initial Catalog=DigitalLibraryDB», щоб БД мала правильне ім’я.
+            // Формуємо рядок підключення з AttachDbFilename 
             var connectionString =
                 $"Server=(localdb)\\MSSQLLocalDB;" +
                 $"AttachDbFilename={mdfPath};" +

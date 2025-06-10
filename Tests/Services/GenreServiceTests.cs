@@ -149,9 +149,9 @@ namespace Tests.Services
         [Test]
         public async Task ReadByIdAsync_NonExistingId_Throws_KeyNotFoundException()
         {
-            // Arrange: аналогічно, але без жодного genreRepoMock.ReadByIdAsync(x)→ non-existing
+            // Arrange: аналогічно, але без жодного genreRepoMock.ReadByIdAsync(x)-> non-existing
             var genreRepoMock = Substitute.For<IGenericRepository<Genre>>();
-            // Налаштуємо всі id → null
+            // Налаштуємо всі id -> null
             genreRepoMock
                 .ReadByIdAsync(Arg.Any<int>())
                 .Returns(Task.FromResult<Genre>(null));
@@ -159,7 +159,6 @@ namespace Tests.Services
             var uowMock = Substitute.For<IUnitOfWork>();
             uowMock.Genres.Returns(genreRepoMock);
 
-            // Мапер не знадобиться, бо ніколи не дійде до Map() при неіснуючому id
             var mapperMock = Substitute.For<IMapper>();
 
             var service = new GenreService(uowMock, mapperMock);
@@ -175,7 +174,7 @@ namespace Tests.Services
         [Test]
         public async Task CreateAsync_WithValidDto_Calls_CreateAsync_Then_CommitAsync()
         {
-            // 1. Arrange: мок репозиторію, налаштуємо CreateAsync і CommitAsync
+            //  Arrange: мок репозиторію, налаштуємо CreateAsync і CommitAsync
             var genreRepoMock = Substitute.For<IGenericRepository<Genre>>();
             genreRepoMock.CreateAsync(Arg.Any<Genre>()).Returns(Task.CompletedTask);
 
@@ -183,7 +182,7 @@ namespace Tests.Services
             uowMock.Genres.Returns(genreRepoMock);
             uowMock.CommitAsync().Returns(Task.FromResult(1));
 
-            // 2. Мок IMapper для GenreDto → Genre
+            // 2. Мок IMapper для GenreDto -> Genre
             var mapperMock = Substitute.For<IMapper>();
             mapperMock
                 .Map<Genre>(Arg.Any<GenreDto>())
@@ -223,15 +222,15 @@ namespace Tests.Services
             await service.UpdateAsync(updateDto);
 
             // Assert
-            // 1) Перевіряємо, що IMapper.Map(dto, existing) було викликано
+            // Перевіряємо, що IMapper.Map(dto, existing) було викликано
             var mapperMock = _container.Resolve<AutoMapper.IMapper>();
             mapperMock.Received(1).Map(Arg.Is<GenreDto>(d => d.Id == 1 && d.Name == "Sci-Fi"),
                                       Arg.Any<Genre>());
 
-            // 2) Перевіряємо, що Update(...) було викликано з сутністю, у якої Id == 1
+            //  Перевіряємо, що Update(...) було викликано з сутністю, у якої Id == 1
             genreRepoMock.Received(1).Update(Arg.Is<Genre>(g => g.Id == 1));
 
-            // 3) Перевіряємо, що CommitAsync() викликався
+            // Перевіряємо, що CommitAsync() викликався
             await uowMock.Received(1).CommitAsync();
         }
 
@@ -271,10 +270,10 @@ namespace Tests.Services
             await service.DeleteAsync(1);
 
             // Assert
-            // 1) Перевіряємо, що Delete(...) викликано для сутності з Id == 1
+            // Перевіряємо, що Delete(...) викликано для сутності з Id == 1
             genreRepoMock.Received(1).Delete(Arg.Is<Genre>(g => g.Id == 1));
 
-            // 2) Перевіряємо, що CommitAsync() викликано
+            // Перевіряємо, що CommitAsync() викликано
             await uowMock.Received(1).CommitAsync();
         }
 

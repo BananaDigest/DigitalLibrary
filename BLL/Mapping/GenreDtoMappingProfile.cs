@@ -13,12 +13,12 @@ namespace BLL.Mapping
     {
         public GenreDtoMappingProfile()
         {
-            // Genre → GenreDto
+            // Genre -> GenreDto
             CreateMap<Genre, GenreDto>()
                 .ForMember(dest => dest.Id, opt => opt.MapFrom(src => src.Id))
                 .ForMember(dest => dest.Name, opt => opt.MapFrom(src => src.Name));
 
-            // GenreDto → Genre
+            // GenreDto -> Genre
             CreateMap<GenreDto, Genre>()
                 .ForMember(dest => dest.Id, opt => opt.MapFrom(src => src.Id))
                 .ForMember(dest => dest.Name, opt => opt.MapFrom(src => src.Name));

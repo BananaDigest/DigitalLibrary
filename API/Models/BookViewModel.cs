@@ -10,12 +10,12 @@ namespace API.Models
         public string Publisher { get; set; }
         public int PublicationYear { get; set; }
         public int GenreId { get; set; }
-        public string GenreName { get; set; }         // Підтягуємо через фасад
+        public string GenreName { get; set; }       
         public List<int> AvailableTypeIds { get; set; } = new();
-        public int InitialCopies { get; set; }        // Нова властивість DTO → клієнту
-        public int AvailableCopies { get; set; }      // Нова властивість DTO → клієнту
-        public int DownloadCount { get; set; }        // Нова властивість DTO → клієнту
-        public int ListenCount { get; set; }          // Нова властивість DTO → клієнту
+        public int InitialCopies { get; set; }       
+        public int AvailableCopies { get; set; }      
+        public int DownloadCount { get; set; }        
+        public int ListenCount { get; set; }      
         public string Description { get; set; }
     }
 }

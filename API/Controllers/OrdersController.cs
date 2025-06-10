@@ -50,21 +50,6 @@ namespace API.Controllers
             return Ok(result);
         }
 
-        //[HttpGet("by-user/{userId:int}")]
-        //public async Task<IActionResult> ReadByUser(int userId)
-        //{
-
-        //    var currentUserId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value);
-        //    var currentRole = User.FindFirst(ClaimTypes.Role)?.Value;
-
-        //    if (currentRole != "Administrator" && currentRole != "Manager" && currentUserId != userId)
-        //        return Forbid(); // 403
-        //    var orderDtos = await _facade.ReadOrdersByUserAsync(userId);
-        //    var result = _mapper.Map<IEnumerable<OrderViewModel>>(orderDtos);
-        //    return Ok(result);
-        //}
-
-
         [HttpGet("by-user/{userId:int}")]
         public async Task<IActionResult> ReadByUser(int userId)
         {
@@ -109,45 +94,6 @@ namespace API.Controllers
             var resultByToken = _mapper.Map<IEnumerable<OrderViewModel>>(ordersByToken);
             return Ok(resultByToken);
         }
-
-
-        //[HttpPost]
-        //public async Task<IActionResult> Create([FromBody] CreateOrderModel model)
-        //{
-        //    if (!ModelState.IsValid)
-        //        return BadRequest(ModelState);
-
-        //    // 1. Беремо ID поточного користувача та роль із Claims
-        //    var currentUserId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value);
-        //    var currentRole = User.FindFirst(ClaimTypes.Role)?.Value;
-
-        //    // 2. Визначаємо, чи можемо використовувати model.UserId,
-        //    //    аби потім заповнити dto.UserId.
-        //    int finalUserId;
-        //    if (currentRole == "Administrator" || currentRole == "Manager")
-        //    {
-        //        // Адмін і Менеджер можуть вказувати будь-який UserId у запиті:
-        //        finalUserId = model.UserId;
-        //    }
-        //    else
-        //    {
-        //        // Усі інші (Registered і гість) можуть створювати замовлення
-        //        // тільки для "себе" → використовуємо поточний ID
-        //        finalUserId = currentUserId;
-        //    }
-
-        //    // 3. Мапимо решту полів у ActionOrderDto
-        //    var dto = _mapper.Map<ActionOrderDto>(model);
-
-        //    // 4. Перезаписуємо UserId з визначеного вище finalUserId
-        //    dto.UserId = finalUserId;
-
-        //    // 5. Створюємо замовлення
-        //    await _facade.CreateOrderAsync(dto);
-
-        //    return CreatedAtAction(nameof(ReadById), new { id = dto.Id }, null);
-        //}
-
 
         [HttpPost]
         public async Task<IActionResult> Create([FromBody] CreateOrderModel model)
@@ -232,41 +178,6 @@ namespace API.Controllers
             }
         }
 
-        //[HttpDelete("{id:int}")]
-        //[AllowAnonymous]
-        //public async Task<IActionResult> Delete(int id)
-        //{
-        //    var isAdmin = User.IsInRole("Administrator");
-        //    try
-        //    {
-        //        // 1. Отримуємо сам об’єкт замовлення (щоб дізнатися, кому воно належить)
-        //        var orderDto = await _facade.ReadOrderByIdAsync(id);
-        //    if (orderDto == null)
-        //        return NotFound();
-
-        //    // 2. Зчитуємо поточний UserId та роль із Claims
-        //    var currentUserId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value);
-        //    var currentRole = User.FindFirst(ClaimTypes.Role)?.Value;
-
-        //    // 3. Якщо не Administrator і замовлення не належить поточному користувачеві → заборонено
-        //    if (currentRole != "Administrator" && orderDto.UserId != currentUserId)
-        //        return Forbid();
-
-        //    // 4. Інакше видаляємо
-        //    await _facade.DeleteOrderAsync(id, isAdmin);
-        //    return NoContent();
-        //    }
-        //    catch (UnauthorizedAccessException)
-        //    {
-        //        return Forbid();
-        //    }
-        //    catch (KeyNotFoundException)
-        //    {
-        //        return NotFound();
-        //    }
-        //}
-
-
         [HttpDelete("{id:int}")]
         [AllowAnonymous]
         public async Task<IActionResult> Delete(int id)
@@ -306,24 +217,12 @@ namespace API.Controllers
                 var orderDto = await _facade.ReadOrderByIdAsync(id);
                 if (orderDto == null)
                     return NotFound();
-
-                
                 // Доступ дозволено:
                 // 1. Якщо користувач — адмін
                 // 2. Якщо користувач — власник замовлення
                 // 3. Якщо токен — статичний (qwerty)
                 if (!(isAdmin || tokenIsStatic || (currentUserId.HasValue && orderDto.UserId == currentUserId.Value)))
                     return Forbid();
-                //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-                //МОЖНА ТАКОЖ СПРОБУВАТИ ЦЕЙ СПОСІБ,
-                //ПРОСТО ЗАКОМЕНТУВАВШИ isAdmin = true; НА 304 РЯДКУ
-                //ТАКОЖ ЗАКОМЕНТУВАВШИ РЯДОК 326 await _facade.DeleteOrderAsync(id, isAdmin);
-                //і РОЗКОМЕНТУВАВШИ НАСТУПНІ 4 РЯДКИ (323-326)
-                //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-                //bool effectiveIsAdmin = isAdmin || tokenIsStatic;
-                //if (!(effectiveIsAdmin || (currentUserId.HasValue && orderDto.UserId == currentUserId.Value)))
-                //    return Forbid();
-                //await _facade.DeleteOrderAsync(id, effectiveIsAdmin);
                 await _facade.DeleteOrderAsync(id, isAdmin);
                 return NoContent();
             }
@@ -336,7 +235,5 @@ namespace API.Controllers
                 return NotFound();
             }
         }
-
-
     }
 }

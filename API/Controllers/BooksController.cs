@@ -22,7 +22,7 @@ namespace API.Controllers
         }
 
         [HttpGet]
-        [AllowAnonymous] // усі можуть дивитися каталог без логіну
+        [AllowAnonymous] 
         public async Task<IActionResult> ReadAll()
         {
             var bookDtos = await _facade.ReadAllBooksAsync();

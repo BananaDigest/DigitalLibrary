@@ -13,7 +13,7 @@ namespace API.Mapping
     {
         public BookMappingProfile()
         {
-            // CreateBookModel → ActionBookDto
+            // CreateBookModel -> ActionBookDto
             CreateMap<CreateBookModel, ActionBookDto>()
                 .ForMember(dest => dest.Title, opt => opt.MapFrom(src => src.Title))
                 .ForMember(dest => dest.Author, opt => opt.MapFrom(src => src.Author))
@@ -24,7 +24,7 @@ namespace API.Mapping
                 .ForMember(dest => dest.CopyCount, opt => opt.MapFrom(src => src.CopyCount))
                 .ForMember(dest => dest.Description, opt => opt.MapFrom(src => src.Description));
 
-            // BookDto → BookViewModel
+            // BookDto -> BookViewModel
             CreateMap<BookDto, BookViewModel>()
                 .ForMember(dest => dest.Id, opt => opt.MapFrom(src => src.Id))
                 .ForMember(dest => dest.Title, opt => opt.MapFrom(src => src.Title))

@@ -1,0 +1,120 @@
+
+<!DOCTYPE html>
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+		<title>Електронна бібліотека</title>
+		<link href="cs/style.css" type="text/css" rel="stylesheet" />
+    <link rel="shortcut icon" href="image/liblary.png" type="image/png">
+    <script  type="text/javascript" src="js/scripts.js"></script>
+     <script  type="text/javascript" src="js/scripts_user.js"></script>
+    </head>
+	<body>
+        <div class = 'header'>
+            <div class="logo"><img src="image/library-book.png" alt="Logo"></div>
+            <div class="search"><input id="searchInput" type="text" placeholder="ПОШУК"><span class="btn-search" id="searchBtn"><img src="image/loupe.png"></span></div>
+            <div class="btn-header">
+                <button class="btn1" id="btnAllOrder">Замовлення</button>
+                <button class="btn2"  id="btnExit">Вихід</button>
+            </div>
+        </div>
+		<div class = 'wrapper'>
+         <div class="wrapper-background-cat">
+            <div class="filter-wrapper">
+                 <div class="filter1">
+                    <div class="filter-title">За типом</div>
+                    <div class="filter-text" id="typeFilterContainer"></div>
+                </div> 
+                <div class="filter2">
+                    <div class="filter-title">За жанром</div>
+                    <div class="filter-text" id="genreFilterContainer"></div>
+                </div>
+                <div class="filter3">
+                    <div class="filter-title">Видавництво</div>
+                    <div class="filter-text"id="publisherFilterContainer"></div>
+                </div>
+                <button id="resetFiltersBtn" class="btn1">Скинути фільтри</button>
+            </div>
+            <div class="product-wrapper">
+                
+            </div>
+         </div>
+        </div>
+
+
+
+             <!-- Модальне вікно -->
+  <div id="authModal" class="modal">
+    <div class="modal-content" id="modalContent">
+      <span class="btn-close" id="modalClose">&times;</span>
+
+      <!-- Вхід -->
+    <div id="loginForm">
+  <h2>Вхід</h2>
+  <input type="text" placeholder="Логін">
+  <input type="password" placeholder="Пароль">
+  <button class="btn1">Увійти</button>
+  <div class="modal-switch">
+    <a href="#" id="switchToRegister">Немає акаунта? Зареєструйтесь</a>
+  </div>
+</div>
+
+<div id="registerForm" style="display: none;">
+  <h2>Реєстрація</h2>
+  <input type="text" placeholder="Ім’я">
+  <input type="text" placeholder="Прізвище">
+  <input type="text" placeholder="Логін">
+  <input type="password" placeholder="Пароль">
+  <button class="btn1">Зареєструватись</button>
+  <div class="modal-switch">
+    <a href="#" id="switchToLogin">Вже маєте акаунт? Увійдіть</a>
+  </div>
+</div>
+
+
+
+
+    </div>
+  </div>
+
+	<div id="ordersModal" class="modal" style="display:none;">
+  <div class="modal-content">
+    <span class="btn-close" id="ordersModalClose">&times;</span>
+    <h2>Ваші замовлення</h2>
+    <div id="ordersList">
+      <!-- Тут будуть завантажені замовлення -->
+    </div>
+  </div>
+</div>
+
+
+    <!-- Модальне вікно для книги -->
+<div id="bookModal" class="modal" style="display:none;">
+  <div class="modal-content" id="bookModalContent">
+    <span class="btn-close" id="bookModalClose">&times;</span>
+    <img id="modalImage" src="" alt="Book Image" style="max-width: 200px;">
+    <h3 id="modalTitle"></h3>
+    <p><strong>Автор:</strong> <span id="modalAuthor"></span></p>
+    <p><strong>Видавництво:</strong> <span id="modalPublisher"></span></p>
+    <p><strong>Рік видання:</strong> <span id="modalYear"></span></p>
+    <p><strong>Жанр:</strong> <span id="modalGenre"></span></p>
+    <p><strong>Опис:</strong> <span id="modalDescription"></span></p>
+
+    <!-- Контейнер для радіокнопок -->
+    <div id="bookTypeSelection">
+      
+    </div>
+
+    <!-- Кнопки дій -->
+    <div class="modal-buttons">
+      <button id="btnOrder" class="btn1" style="display:none;">Замовити</button>
+      <div id="noStockMessage" style="display:none;">Немає в наявності</div>
+      <button id="btnDownload" class="btn1" style="display:none;">Скачати</button>
+      <button id="btnListen" class="btn1" style="display:none;">Прослухати</button>
+    </div>
+  </div>
+</div>
+  </div>
+</div>
+
+</body>
+</html>

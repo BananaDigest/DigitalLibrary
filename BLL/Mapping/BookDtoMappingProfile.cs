@@ -13,7 +13,7 @@ namespace BLL.Mapping
     {
         public BookDtoMappingProfile()
         {
-            // Book → BookDto
+            // Book -> BookDto
             CreateMap<Book, BookDto>()
                 .ForMember(dest => dest.AvailableTypeIds,
                            opt => opt.MapFrom(src => src.AvailableTypes.Select(at => at.Id).ToList()))
@@ -28,7 +28,7 @@ namespace BLL.Mapping
                 .ForMember(dest => dest.Description,
                            opt => opt.MapFrom(src => src.Description));
 
-            // ActionBookDto → Book
+            // ActionBookDto -> Book
             CreateMap<ActionBookDto, Book>()
                 .ForMember(dest => dest.AvailableTypes, opt => opt.Ignore())
                 .ForMember(dest => dest.Copies, opt => opt.Ignore())

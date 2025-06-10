@@ -105,14 +105,6 @@ namespace API.Controllers
             return Ok(result);
         }
 
-        //[HttpGet("get-all-users")]
-        //[Authorize(Roles = "Manager,Administrator, Registered")]
-        //public async Task<IActionResult> ReadAll()
-        //{
-        //    var users = await _facade.ReadAllUsersAsync();
-        //    // Передамо у ViewModel (якщо потрібна додаткова фільтрація) або просто повернемо як є:
-        //    return Ok(users);
-        //}
         [HttpGet("get-all-users")]
         public async Task<IActionResult> ReadAll()
         {
@@ -231,23 +223,9 @@ namespace API.Controllers
             }
             catch (Exception ex)
             {
-                // Логування можна додати тут
                 return StatusCode(500, new { message = "Внутрішня помилка сервера при видаленні користувача." });
             }
         }
-        //[HttpDelete("{id:int}")]
-        //[AllowAnonymous]
-        //public async Task<IActionResult> Delete(int id)
-        //{
-        //    var currentUserId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value);
-        //    var currentRole = User.FindFirst(ClaimTypes.Role)?.Value;
-
-        //    if (currentRole != "Administrator" && currentUserId != id)
-        //        return Forbid(); // 403
-        //    await _facade.DeleteUserAsync(id);
-        //    return NoContent();
-        //}
-
         // ==================== Access Denied ====================
         [HttpGet("denied")]
         public IActionResult AccessDenied()

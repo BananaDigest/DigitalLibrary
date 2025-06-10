@@ -29,7 +29,6 @@ namespace BLL.Services
             var user = _mapper.Map<User>(dto);
             user.Role = UserRole.Registered;
             await _uow.Users.CreateAsync(user);
-            //await _uow.CommitAsync();
             try
             {
                 await _uow.CommitAsync();
@@ -37,19 +36,16 @@ namespace BLL.Services
             catch (DbUpdateException ex)
             {
                 Console.WriteLine("Збереження не вдалося: " + ex.InnerException?.Message);
-                throw;  // пробросити далі або обробити за потреби
+                throw;
             }
         }
 
         public async Task<IEnumerable<UserDto>> ReadAllUsersAsync()
         {
-            // 1) Зчитуємо усіх юзерів (повертає IEnumerable<User>)
             var allEntities = await _uow.Users.ReadAllAsync();
 
-            // 2) Мапимо на List<UserDto>
             var dtoList = _mapper.Map<List<UserDto>>(allEntities);
 
-            // 3) В ручному циклі прибираємо пароль
             foreach (var dto in dtoList)
             {
                 dto.Password = null;
@@ -74,15 +70,14 @@ namespace BLL.Services
         }
         public async Task<UserDto> AuthenticateAsync(string email, string password)
         {
-            // 1) Знаходимо по email
+            //Знаходимо по email
             var allUsers = await _uow.Users.ReadAllAsync();
             var user = allUsers.FirstOrDefault(u =>
                 u.Email.Equals(email, StringComparison.OrdinalIgnoreCase))
-                ?? throw new UnauthorizedAccessException("Невірний email або пароль");
+                ?? throw new UnauthorizedAccessException("Невірний email");
 
-            // 2) Простий Plain-text порівняння (для демонстрації)
             if (user.Password != password)
-                throw new UnauthorizedAccessException("Невірний email або пароль");
+                throw new UnauthorizedAccessException("Невірний пароль");
 
             return _mapper.Map<UserDto>(user);
         }
@@ -90,18 +85,16 @@ namespace BLL.Services
         public async Task UpdateUserAsync(UserDto dto)
         {
             var userEntity = await _uow.Users
-                .ReadAllUser()               // IQueryable<User>
+                .ReadAllUser()   
                 .FirstOrDefaultAsync(u => u.Id == dto.Id);
 
             if (userEntity == null)
                 throw new KeyNotFoundException($"User with Id = {dto.Id} not found.");
 
-            // 2) Мапимо оновлені поля з dto (AutoMapper ігнорує роль)
             _mapper.Map(dto, userEntity);
 
             _uow.Users.Update(userEntity);
 
-            // 5) Фіксуємо зміни
             await _uow.CommitAsync();
         }
     }

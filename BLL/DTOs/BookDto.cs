@@ -13,11 +13,9 @@ namespace BLL.DTOs
         public int GenreId { get; set; }
         public GenreDto Genre { get; set; }
         public string Description { get; set; }
-
-        // Додайте ці нові властивості
-        public int AvailableCopies { get; set; }  // Доступні паперові копії
-        public int InitialCopies { get; set; }    // Початкова кількість паперових копій
-        public int DownloadCount { get; set; }    // Кількість завантажень (електронна версія)
-        public int ListenCount { get; set; }      // Кількість прослуховувань (аудіо версія)
+        public int AvailableCopies { get; set; }  
+        public int InitialCopies { get; set; }    
+        public int DownloadCount { get; set; }    
+        public int ListenCount { get; set; }      
     }
 }

@@ -36,25 +36,25 @@ namespace Tests.Services
                 .Options;
             _inMemoryContext = new TestAppDbContext(options);
 
-            // 1) Mock IUnitOfWork
+            // Mock IUnitOfWork
             _uowMock = Substitute.For<IUnitOfWork>();
 
-            // 2) Mock Books repository
+            // Mock Books repository
             var booksRepo = Substitute.For<IGenericRepository<Book>>();
             var bookTypesRepo = Substitute.For<IGenericRepository<BookTypeEntity>>();
             _uowMock.Books.Returns(booksRepo);
             _uowMock.BookTypes.Returns(bookTypesRepo);
 
-            // 3) ReadAll() повертає фактичний InMemory DbSet (категорія з Include/... підтримується)
+            // ReadAll() повертає фактичний InMemory DbSet (категорія з Include/... підтримується)
             booksRepo.ReadAll().Returns(_inMemoryContext.Books);
 
-            // 4) CommitAsync повертає Task<int>
+            // CommitAsync повертає Task<int>
             _uowMock.CommitAsync().Returns(Task.FromResult(0));
 
-            // 3) Mock AutoMapper
+            // Mock AutoMapper
             _mapperMock = Substitute.For<IMapper>();
 
-            // 4) Create BookService with mocked UoW, Mapper, and a dummy IBookFactory
+            // Create BookService with mocked UoW, Mapper, and a dummy IBookFactory
             _service = new BookService(
                 _uowMock,
                 _mapperMock,
@@ -106,13 +106,13 @@ namespace Tests.Services
                 }
             };
 
-            // Convert to an async IQueryable
+            // Конвертуємо в async IQueryable
             var asyncBooks = new TestAsyncEnumerable<Book>(domainBooks);
 
-            // Configure ReadAll() to return this async IQueryable
+            //налаштовуємо ReadAll() щоб повертало цей async IQueryable
             _uowMock.Books.ReadAll().Returns(asyncBooks);
 
-            // Configure AutoMapper to map each Book to BookDto
+            // Налаштовуємо AutoMapper щоб мапити Book в BookDto
             _mapperMock
                 .Map<IEnumerable<BookDto>>(Arg.Any<IEnumerable<Book>>())
                 .Returns(call =>
@@ -194,7 +194,7 @@ namespace Tests.Services
         public async Task ReadByTypeAsync_WithMatchingBooks_ReturnsMappedDtos()
         {
             // ARRANGE
-            // Create several books, two of which have AvailableTypes containing typeId=1
+            // Створюємо кілька книжок, дві з яких мають AvailableTypes typeId=1
             var domainBooks = new List<Book>
             {
                 new Book
@@ -245,13 +245,12 @@ namespace Tests.Services
                 }
             };
 
-            // Wrap in TestAsyncEnumerable<Book>
             var asyncBooks = new TestAsyncEnumerable<Book>(domainBooks);
 
-            // Configure ReadAll() to return this async IQueryable
+            // налаштовуємо ReadAll() щоб повенути async IQueryable
             _uowMock.Books.ReadAll().Returns(asyncBooks);
 
-            // Configure AutoMapper to map List<Book> -> List<BookDto>
+            // Налаштовуємо AutoMapper щоб мапити List<Book> -> List<BookDto>
             _mapperMock
                 .Map<List<BookDto>>(Arg.Any<List<Book>>())
                 .Returns(call =>
@@ -269,11 +268,11 @@ namespace Tests.Services
                     }).ToList();
                 });
 
-            // ACT: retrieve only typeId = 1 (Paper)
+            // ACT: знайти тільки typeId = 1 (Paper)
             var result = await _service.ReadByTypeAsync(1);
 
             // ASSERT
-            // Should return two books: Id=1 and Id=3
+            // Має повернути 2 книжки: Id=1 and Id=3
             result.Should().HaveCount(2);
             result.Should().ContainEquivalentOf(new BookDto
             {
@@ -330,7 +329,7 @@ namespace Tests.Services
                 .Map<List<BookDto>>(Arg.Any<List<Book>>())
                 .Returns(new List<BookDto>());
 
-            // ACT: looking for typeId = 1 (Paper), but none match
+            // ACT: шукаємо typeId = 1 (Paper), але жоден не підходить
             var result = await _service.ReadByTypeAsync(1);
 
             // ASSERT
@@ -355,7 +354,7 @@ namespace Tests.Services
                 CopyCount = 3
             };
 
-            // 1) Мокаємо AutoMapper: Map<ActionBookDto, Book>
+            // Мокаємо AutoMapper: Map<ActionBookDto, Book>
             _mapperMock
                 .Map<Book>(Arg.Is<ActionBookDto>(a => a == dto))
                 .Returns(call =>
@@ -373,7 +372,7 @@ namespace Tests.Services
                     };
                 });
 
-            // 2) Мокаємо BookTypes.ReadByIdAsync:
+            // Мокаємо BookTypes.ReadByIdAsync:
             var paperType = new BookTypeEntity { Id = (int)BookType.Paper, Name = "Paper" };
             var electronicType = new BookTypeEntity { Id = (int)BookType.Electronic, Name = "Electronic" };
 
@@ -384,14 +383,14 @@ namespace Tests.Services
                 .ReadByIdAsync((int)BookType.Electronic)
                 .Returns(Task.FromResult<BookTypeEntity?>(electronicType));
 
-            // 3) Захоплюємо аргумент, переданий до CreateAsync
+            // Захоплюємо аргумент, переданий до CreateAsync
             Book? createdBook = null;
             _uowMock.Books
                 .When(r => r.CreateAsync(Arg.Any<Book>()))
                 .Do(ci => createdBook = ci.Arg<Book>());
             _uowMock.Books.CreateAsync(Arg.Any<Book>()).Returns(Task.CompletedTask);
 
-            // 4) Мокаємо CommitAsync як Task<int>
+            // Мокаємо CommitAsync як Task<int>
             _uowMock.CommitAsync().Returns(Task.FromResult(0));
 
             // ACT
@@ -427,7 +426,7 @@ namespace Tests.Services
                 PublicationYear = 2022,
                 GenreId = 6,
                 AvailableTypeIds = new List<int> { (int)BookType.Audio },
-                CopyCount = 5 // але Audio -> не створюємо копії
+                CopyCount = 5 
             };
 
             _mapperMock
@@ -516,13 +515,13 @@ namespace Tests.Services
         public async Task UpdateAsync_ExistingBook_UpdatesFieldsAndTypesAndCopies()
         {
             // ARRANGE
-            // 1) Додаємо BookTypeEntity для Id=1 і Id=2 у контекст
+            // Додаємо BookTypeEntity для Id=1 і Id=2 у контекст
             var initialType1 = new BookTypeEntity { Id = 1, Name = "Paper" };
             var initialType2 = new BookTypeEntity { Id = 2, Name = "Electronic" };
             _inMemoryContext.BookTypes.AddRange(initialType1, initialType2);
             _inMemoryContext.SaveChanges();
 
-            // 2) Додаємо доменну Book із початковими властивостями, включаючи AvailableTypes і Copies
+            // Додаємо доменну Book із початковими властивостями, включаючи AvailableTypes і Copies
             var domainBook = new Book
             {
                 Id = 100,
@@ -544,18 +543,18 @@ namespace Tests.Services
             _inMemoryContext.Books.Add(domainBook);
             _inMemoryContext.SaveChanges();
 
-            // 3) Додаємо новий тип Id=3 у контекст
+            // Додаємо новий тип Id=3 у контекст
             var newType = new BookTypeEntity { Id = 3, Name = "Audio" };
             _inMemoryContext.BookTypes.Add(newType);
             _inMemoryContext.SaveChanges();
 
-            // 4) Стабізуємо BookTypes.ReadByIdAsync(3) через реальний контекст
+            // Стабізуємо BookTypes.ReadByIdAsync(3) через реальний контекст
             _uowMock.BookTypes
                 .ReadByIdAsync(3)
                 .Returns(_inMemoryContext.BookTypes.FindAsync(3).AsTask());
 
-            // 5) Готуємо ActionBookDto із новими полями:
-            //    — убираємо тип 2, залишаємо 1, додаємо 3; CopyCount = 4
+            // Готуємо ActionBookDto із новими полями:
+            //    — прибираємо тип 2, залишаємо 1, додаємо 3; CopyCount = 4
             var dto = new ActionBookDto
             {
                 Title = "New Title",
@@ -572,7 +571,7 @@ namespace Tests.Services
             await _service.UpdateAsync(domainBook.Id, dto);
 
             // ASSERT
-            // 1) Примітивні поля оновлено
+            // Примітивні поля оновлено
             domainBook.Title.Should().Be("New Title");
             domainBook.Author.Should().Be("New Author");
             domainBook.Publisher.Should().Be("New Pub");
@@ -582,18 +581,18 @@ namespace Tests.Services
             domainBook.InitialCopies.Should().Be(4);
             domainBook.AvailableCopies.Should().Be(4);
 
-            // 2) AvailableTypes: мають бути лише типи 1 та 3
+            // AvailableTypes: мають бути лише типи 1 та 3
             domainBook.AvailableTypes.Select(t => t.Id)
                 .OrderBy(id => id)
                 .Should().Equal(new[] { 1, 3 });
 
-            // 3) Copies: створено 4 нові копії з CopyNumber 1..4, усі IsAvailable = true
+            // Copies: створено 4 нові копії з CopyNumber 1..4, усі IsAvailable = true
             domainBook.Copies.Should().HaveCount(4);
             domainBook.Copies.Select(c => c.CopyNumber).OrderBy(n => n)
                 .Should().Equal(new[] { 1, 2, 3, 4 });
             domainBook.Copies.All(c => c.IsAvailable).Should().BeTrue();
 
-            // 4) Перевіряємо виклик CommitAsync
+            // Перевіряємо виклик CommitAsync
             await _uowMock.Received(1).CommitAsync();
         }
 
@@ -683,7 +682,6 @@ namespace Tests.Services
             {
                 Id = bookId,
                 Title = "Title"
-                // інші властивості можна лишити незаповненими
             };
 
             // Налаштовуємо ReadByIdAsync назад existingBook
@@ -849,13 +847,11 @@ namespace Tests.Services
             {
                 base.OnModelCreating(modelBuilder);
 
-                // Якщо потрібно, налаштуйте зв’язки тут
                 modelBuilder.Entity<BookCopy>()
                     .HasOne<Book>()
                     .WithMany(b => b.Copies)
                     .HasForeignKey(bc => bc.BookId)
                     .OnDelete(DeleteBehavior.Cascade);
-
             }
         }
     }

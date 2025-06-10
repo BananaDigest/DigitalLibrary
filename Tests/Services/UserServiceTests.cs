@@ -30,29 +30,29 @@ namespace Tests.Services
         [SetUp]
         public void SetUp()
         {
-            // 1) Створюємо InMemory‐контекст для «Users»
+            // Створюємо InMemory‐контекст для «Users»
             var options = new DbContextOptionsBuilder<TestAppDbContext>()
                 .UseInMemoryDatabase(Guid.NewGuid().ToString())
                 .Options;
             _inMemoryContext = new TestAppDbContext(options);
 
-            // 1) Мокаємо IUnitOfWork
+            // Мокаємо IUnitOfWork
             _uowMock = Substitute.For<IUnitOfWork>();
 
-            // 2) Мокаємо репозиторій Users (IGenericRepository<User>)
+            // Мокаємо репозиторій Users (IGenericRepository<User>)
             var usersRepo = Substitute.For<IGenericRepository<User>>();
             _uowMock.Users.Returns(usersRepo);
 
-            // 3) CreateAsync у Users повертає просто Task
+            // CreateAsync у Users повертає просто Task
             usersRepo.CreateAsync(Arg.Any<User>()).Returns(Task.CompletedTask);
 
-            // 4) CommitAsync повертає Task<int> (має бути Task.FromResult<int>)
+            // CommitAsync повертає Task<int> (має бути Task.FromResult<int>)
             _uowMock.CommitAsync().Returns(Task.FromResult(0));
 
-            // 5) Мокаємо AutoMapper
+            // Мокаємо AutoMapper
             _mapperMock = Substitute.For<IMapper>();
 
-            // 6) Створюємо сервіс
+            // Створюємо сервіс
             _service = new UserService(_uowMock, _mapperMock);
         }
 
@@ -75,7 +75,7 @@ namespace Tests.Services
                 Password = "Secure123!"
             };
 
-            // Налаштовуємо AutoMapper: з UserDto → User (setting Role = Guest для початку)
+            // Налаштовуємо AutoMapper: з UserDto -> User (setting Role = Guest для початку)
             _mapperMock
                 .Map<User>(Arg.Is<UserDto>(d => d == dto))
                 .Returns(call =>
@@ -85,7 +85,7 @@ namespace Tests.Services
                     {
                         Email = inDto.Email,
                         Password = inDto.Password,
-                        Role = UserRole.Guest // буде перезаписано
+                        Role = UserRole.Guest 
                     };
                 });
 
@@ -249,7 +249,7 @@ namespace Tests.Services
             var allUsers = new List<User> { userEntity };
             _uowMock.Users.ReadAllAsync().Returns(Task.FromResult<IEnumerable<User>>(allUsers));
 
-            // Налаштовуємо AutoMapper: з User → UserDto
+            // Налаштовуємо AutoMapper: з User -> UserDto
             var expectedDto = new UserDto
             {
                 Id = userEntity.Id,
@@ -377,7 +377,7 @@ namespace Tests.Services
         {
             // ARRANGE
             var missingId = 99;
-            // Не додаємо жодного користувача в InMemoryContext → Users порожня
+            // Не додаємо жодного користувача в InMemoryContext -> Users порожня
             // Налаштовуємо ReadAllUser() повернути саме DbSet<User> (порожній)
             _uowMock.Users.ReadAllUser().Returns(_inMemoryContext.Users);
 
@@ -430,13 +430,12 @@ namespace Tests.Services
                 .ReadAllAsync()
                 .Returns(Task.FromResult<IEnumerable<User>>(domainUsers));
 
-            // Налаштовуємо AutoMapper так, щоб він перетворював User → UserDto
+            // Налаштовуємо AutoMapper так, щоб він перетворював User -> UserDto
             _mapperMock
                 .Map<List<UserDto>>(Arg.Any<List<User>>())
                 .Returns(call =>
                 {
                     var sourceList = call.Arg<List<User>>();
-                    // Прив’язуємо пропорційно
                     return sourceList.Select(u => new UserDto
                     {
                         Id = u.Id,
@@ -444,7 +443,6 @@ namespace Tests.Services
                         FirstName = u.FirstName,
                         LastName = u.LastName,
                         Role = u.Role.ToString(),
-                        // передамо пароль з домену, цей тест перевірятиме, що сервіс потім його обнуляє
                         Password = u.Password
                     }).ToList();
                 });
@@ -618,7 +616,7 @@ namespace Tests.Services
                         return firstCall;
                     }
 
-                    // 3) Якщо ToListAsync(...), спростимо до Queryable.ToList
+                    // Якщо ToListAsync(...), спростимо до Queryable.ToList
                     if (mce.Method.DeclaringType == typeof(EntityFrameworkQueryableExtensions)
                         && mce.Method.Name == nameof(EntityFrameworkQueryableExtensions.ToListAsync))
                     {
@@ -631,7 +629,7 @@ namespace Tests.Services
                         return toListCall;
                     }
 
-                    // 4) Інші виклики – рекурсивно чистимо аргументи
+                    // Інші виклики – рекурсивно чистимо аргументи
                     var newArgs = mce.Arguments.Select(arg => StripEfMethods(arg)).ToArray();
                     var newObj = mce.Object != null ? StripEfMethods(mce.Object) : null;
                     return mce.Update(newObj, newArgs);
@@ -651,13 +649,11 @@ namespace Tests.Services
 
             public DbSet<Book> Books { get; set; } = null!;
             public DbSet<BookCopy> BookCopies { get; set; } = null!;
-            public DbSet<User> Users { get; set; } = null!; // ← додаємо DbSet<User>
+            public DbSet<User> Users { get; set; } = null!; 
 
             protected override void OnModelCreating(ModelBuilder modelBuilder)
             {
                 base.OnModelCreating(modelBuilder);
-
-                // Якщо є зв’язки, додайте тут
             }
         }
     }

@@ -13,13 +13,13 @@ namespace API.Mapping
     {
         public OrderMappingProfile()
         {
-            // CreateOrderModel → ActionOrderDto
+            // CreateOrderModel -> ActionOrderDto
             CreateMap<CreateOrderModel, ActionOrderDto>()
                 .ForMember(dest => dest.UserId, opt => opt.MapFrom(src => src.UserId))
                 .ForMember(dest => dest.BookId, opt => opt.MapFrom(src => src.BookId))
                 .ForMember(dest => dest.OrderType, opt => opt.MapFrom(src => src.OrderType));
 
-            // OrderDto → OrderViewModel
+            // OrderDto -> OrderViewModel
             CreateMap<OrderDto, OrderViewModel>()
                 .ForMember(dest => dest.Id, opt => opt.MapFrom(src => src.Id))
                 .ForMember(dest => dest.UserId, opt => opt.MapFrom(src => src.UserId))

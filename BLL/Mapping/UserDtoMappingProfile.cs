@@ -13,7 +13,7 @@ namespace BLL.Mapping
     {
         public UserDtoMappingProfile()
         {
-            // User → UserDto
+            // User -> UserDto
             CreateMap<User, UserDto>()
                 .ForMember(dest => dest.Id, opt => opt.MapFrom(src => src.Id))
                 .ForMember(dest => dest.Email, opt => opt.MapFrom(src => src.Email))
@@ -22,7 +22,7 @@ namespace BLL.Mapping
                 .ForMember(dest => dest.LastName, opt => opt.MapFrom(src => src.LastName))
                 .ForMember(dest => dest.Role, opt => opt.MapFrom(src => src.Role));
 
-            // UserDto → User (ігноруємо роль)
+            // UserDto -> User 
             CreateMap<UserDto, User>()
                 .ForMember(dest => dest.Id, opt => opt.MapFrom(src => src.Id))
                 .ForMember(dest => dest.Email, opt => opt.MapFrom(src => src.Email))

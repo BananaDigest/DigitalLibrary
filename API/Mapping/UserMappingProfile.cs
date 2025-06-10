@@ -13,10 +13,10 @@ namespace API.Mapping
     {
         public UserMappingProfile()
         {
-            // → UserActionModel → UserDto
+            // UserActionModel -> UserDto
             CreateMap<UserActionModel, UserDto>();
 
-            // → UserDto → UserViewModel
+            // UserDto -> UserViewModel
             CreateMap<UserDto, UserViewModel>()
                 .ForMember(dest => dest.Id, opt => opt.MapFrom(src => src.Id))
                 .ForMember(dest => dest.FirstName, opt => opt.MapFrom(src => src.FirstName))

@@ -13,7 +13,7 @@ namespace BLL.Mapping
     {
         public OrderDtoMappingProfile()
         {
-            // Order → OrderDto
+            // Order -> OrderDto
             CreateMap<Order, OrderDto>()
                 .ForMember(dest => dest.Id, opt => opt.MapFrom(src => src.Id))
                 .ForMember(dest => dest.UserId, opt => opt.MapFrom(src => src.UserId))
@@ -23,7 +23,7 @@ namespace BLL.Mapping
                 .ForMember(dest => dest.BookCopyId, opt => opt.MapFrom(src => src.BookCopyId))
                 .ForMember(dest => dest.OrderDate, opt => opt.MapFrom(src => src.OrderDate));
 
-            // ActionOrderDto → Order
+            // ActionOrderDto -> Order
             CreateMap<ActionOrderDto, Order>()
                 .ForMember(dest => dest.UserId,
                            opt => opt.MapFrom(src => src.UserId))
