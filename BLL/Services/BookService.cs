@@ -67,32 +67,7 @@ namespace BLL.Services
 
         public async Task CreateAsync(ActionBookDto dto)
         {
-            var bookEntity = _mapper.Map<Book>(dto);
-
-            // Створюємо навігаційну колекцію AvailableTypes
-            bookEntity.AvailableTypes = new List<BookTypeEntity>();
-            foreach (var typeId in dto.AvailableTypeIds.Distinct())
-            {
-                var typeEntity = await _uow.BookTypes.ReadByIdAsync(typeId)
-                                 ?? throw new KeyNotFoundException($"BookTypeEntity with Id = {typeId} not found.");
-                bookEntity.AvailableTypes.Add(typeEntity);
-            }
-
-            // Створюємо копії лише якщо є паперовий тип
-            bookEntity.Copies = new List<BookCopy>();
-            if (dto.AvailableTypeIds.Contains((int)BookType.Paper))
-            {
-                // кількість copies = dto.CopyCount
-                for (int i = 1; i <= dto.CopyCount; i++)
-                {
-                    bookEntity.Copies.Add(new BookCopy
-                    {
-                        CopyNumber = i,
-                        IsAvailable = true
-                    });
-                }
-            }
-
+            var bookEntity = await _factory.CreateAsync(dto);
             await _uow.Books.CreateAsync(bookEntity);
             await _uow.CommitAsync();
         }

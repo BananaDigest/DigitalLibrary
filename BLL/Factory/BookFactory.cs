@@ -31,6 +31,9 @@ namespace BLL.Factory
                 Publisher = dto.Publisher,
                 PublicationYear = dto.PublicationYear,
                 GenreId = dto.GenreId,
+                Description = dto.Description,
+                InitialCopies = dto.CopyCount,
+                AvailableCopies = dto.CopyCount,
                 AvailableTypes = new List<BookTypeEntity>()
             };
 
