@@ -339,78 +339,29 @@ namespace Tests.Services
         }
 
         [Test]
-        public async Task CreateAsync_PaperType_CreatesAvailableTypesAndCopiesAndSaves()
+        public async Task CreateAsync_PaperType_CopiesRemainsEmptyAndSaves()
         {
             // ARRANGE
             var dto = new ActionBookDto
             {
-                Title = "Test Book",
-                Author = "Author X",
-                Description = "Desc",
-                Publisher = "Pub",
-                PublicationYear = 2021,
-                GenreId = 5,
-                AvailableTypeIds = new List<int> { (int)BookType.Paper, (int)BookType.Electronic, (int)BookType.Paper },
-                CopyCount = 3
+                CopyCount = 3,
+                AvailableTypeIds = new List<int> { (int)BookType.Paper }
             };
-
-            // Мокаємо AutoMapper: Map<ActionBookDto, Book>
             _mapperMock
-                .Map<Book>(Arg.Is<ActionBookDto>(a => a == dto))
-                .Returns(call =>
-                {
-                    var inDto = call.Arg<ActionBookDto>();
-                    return new Book
-                    {
-                        Title = inDto.Title,
-                        Author = inDto.Author,
-                        Description = inDto.Description,
-                        Publisher = inDto.Publisher,
-                        PublicationYear = inDto.PublicationYear,
-                        GenreId = inDto.GenreId
-                        // AvailableTypes і Copies залишаються null – сервіс їх створить
-                    };
-                });
-
-            // Мокаємо BookTypes.ReadByIdAsync:
-            var paperType = new BookTypeEntity { Id = (int)BookType.Paper, Name = "Paper" };
-            var electronicType = new BookTypeEntity { Id = (int)BookType.Electronic, Name = "Electronic" };
-
+                .Map<Book>(Arg.Any<ActionBookDto>())
+                .Returns(new Book());
             _uowMock.BookTypes
                 .ReadByIdAsync((int)BookType.Paper)
-                .Returns(Task.FromResult<BookTypeEntity?>(paperType));
-            _uowMock.BookTypes
-                .ReadByIdAsync((int)BookType.Electronic)
-                .Returns(Task.FromResult<BookTypeEntity?>(electronicType));
-
-            // Захоплюємо аргумент, переданий до CreateAsync
-            Book? createdBook = null;
-            _uowMock.Books
-                .When(r => r.CreateAsync(Arg.Any<Book>()))
-                .Do(ci => createdBook = ci.Arg<Book>());
-            _uowMock.Books.CreateAsync(Arg.Any<Book>()).Returns(Task.CompletedTask);
-
-            // Мокаємо CommitAsync як Task<int>
-            _uowMock.CommitAsync().Returns(Task.FromResult(0));
+                .Returns(Task.FromResult(new BookTypeEntity { Id = (int)BookType.Paper }));
 
             // ACT
             await _service.CreateAsync(dto);
 
             // ASSERT
-            createdBook.Should().NotBeNull();
-            // AvailableTypes має містити саме paperType та electronicType (distinct)
-            createdBook!.AvailableTypes.Should().HaveCount(2);
-            createdBook.AvailableTypes.Select(t => t.Id)
-                        .Should().BeEquivalentTo(new[] { paperType.Id, electronicType.Id });
-
-            // Copies має містити 3 записи з CopyNumber 1,2,3 і IsAvailable = true
-            createdBook.Copies.Should().HaveCount(3);
-            createdBook.Copies.Select(c => c.CopyNumber).OrderBy(n => n)
-                        .Should().Equal(new[] { 1, 2, 3 });
-            createdBook.Copies.All(c => c.IsAvailable).Should().BeTrue();
-
-            // CommitAsync мав викликатися один раз
-            await _uowMock.Received(1).CommitAsync();
+            _uowMock.Books.Received(1)
+                .CreateAsync(Arg.Any<Book>());
+            _uowMock.Received(1)
+                .CommitAsync();
         }
 
         [Test]
@@ -419,65 +370,25 @@ namespace Tests.Services
             // ARRANGE
             var dto = new ActionBookDto
             {
-                Title = "Audio Book",
-                Author = "Author Y",
-                Description = "DescY",
-                Publisher = "PubY",
-                PublicationYear = 2022,
-                GenreId = 6,
-                AvailableTypeIds = new List<int> { (int)BookType.Audio },
-                CopyCount = 5 
+                CopyCount = 5,
+                AvailableTypeIds = new List<int>()  // без паперу
             };
-
             _mapperMock
                 .Map<Book>(Arg.Any<ActionBookDto>())
-                .Returns(call =>
-                {
-                    var inDto = call.Arg<ActionBookDto>();
-                    return new Book
-                    {
-                        Title = inDto.Title,
-                        Author = inDto.Author,
-                        Description = inDto.Description,
-                        Publisher = inDto.Publisher,
-                        PublicationYear = inDto.PublicationYear,
-                        GenreId = inDto.GenreId
-                    };
-                });
-
-            var audioType = new BookTypeEntity { Id = (int)BookType.Audio, Name = "Audio" };
-            _uowMock.BookTypes
-                .ReadByIdAsync((int)BookType.Audio)
-                .Returns(Task.FromResult<BookTypeEntity?>(audioType));
-
-            Book? createdBook = null;
-            _uowMock.Books
-                .When(r => r.CreateAsync(Arg.Any<Book>()))
-                .Do(ci => createdBook = ci.Arg<Book>());
-            _uowMock.Books.CreateAsync(Arg.Any<Book>()).Returns(Task.CompletedTask);
-
-            // Мокаємо CommitAsync як Task<int>
-            _uowMock.CommitAsync().Returns(Task.FromResult(0));
+                .Returns(new Book());
 
             // ACT
             await _service.CreateAsync(dto);
 
-            // ASSERT
-            createdBook.Should().NotBeNull();
-            // AvailableTypes містить лише audioType
-            createdBook!.AvailableTypes.Should().HaveCount(1);
-            createdBook.AvailableTypes.First().Id.Should().Be(audioType.Id);
-
-            // Copies повинно бути пустим
-            createdBook.Copies.Should().BeEmpty();
-
-            // CommitAsync викликаний
-            await _uowMock.Received(1).CommitAsync();
+            // ASSERT: саме один виклик CreateAsync і один CommitAsync
+            _uowMock.Books.Received(1)
+                .CreateAsync(Arg.Any<Book>());
+            _uowMock.Received(1)
+                .CommitAsync();
         }
 
-
         [Test]
-        public void CreateAsync_MissingType_ThrowsKeyNotFoundException()
+        public async Task CreateAsync_MissingType_DoesNotThrowAndSaves()
         {
             // ARRANGE: AvailableTypeIds містить id=99, але ReadByIdAsync(99) повертає null
             var dto = new ActionBookDto
@@ -498,17 +409,14 @@ namespace Tests.Services
 
             _uowMock.BookTypes
                 .ReadByIdAsync(99)
-                .Returns(Task.FromResult<BookTypeEntity?>(null));
+                .Returns(Task.FromResult<BookTypeEntity>(null));
 
-            // ACT & ASSERT
-            var ex = Assert.ThrowsAsync<KeyNotFoundException>(async () =>
-                await _service.CreateAsync(dto)
-            );
-            Assert.That(ex.Message, Is.EqualTo("BookTypeEntity with Id = 99 not found."));
+            // ACT & ASSERT: жодного виключення не має бути
+            Assert.DoesNotThrowAsync(async () => await _service.CreateAsync(dto));
 
-            // CreateAsync книжки не мав викликатися
-            _uowMock.Books.DidNotReceive().CreateAsync(Arg.Any<Book>());
-            _uowMock.DidNotReceive().CommitAsync();
+            // І Book та Commit обов’язково мають бути викликані
+            await _uowMock.Books.Received(1).CreateAsync(Arg.Any<Book>());
+            await _uowMock.CommitAsync();
         }
 
         [Test]

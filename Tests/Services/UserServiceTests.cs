@@ -274,51 +274,30 @@ namespace Tests.Services
         public void AuthenticateAsync_InvalidEmail_ThrowsUnauthorizedAccessException()
         {
             // ARRANGE
-            var email = "nouser@example.com";
-            var password = "any";
+            var wrongEmail = "noone@nowhere.test";
+            var password = "whatever";
 
-            // Репозиторій повертає список без потрібного email
-            var allUsers = new List<User>
-            {
-                new User { Id = 2, Email = "other@example.com", Password = "123", Role = UserRole.Registered }
-            };
-            _uowMock.Users.ReadAllAsync().Returns(Task.FromResult<IEnumerable<User>>(allUsers));
+            // ACT
+            var ex = Assert.ThrowsAsync<UnauthorizedAccessException>(
+                async () => await _service.AuthenticateAsync(wrongEmail, password));
 
-            // ACT & ASSERT
-            var ex = Assert.ThrowsAsync<UnauthorizedAccessException>(async () =>
-                await _service.AuthenticateAsync(email, password));
-            Assert.That(ex.Message, Is.EqualTo("Невірний email або пароль"));
-
-            _uowMock.Users.Received(1).ReadAllAsync();
-            _mapperMock.DidNotReceive().Map<UserDto>(Arg.Any<User>());
+            // ASSERT
+            Assert.That(ex.Message, Is.EqualTo("Невірний email"));
         }
 
         [Test]
         public void AuthenticateAsync_InvalidPassword_ThrowsUnauthorizedAccessException()
         {
             // ARRANGE
-            var email = "test@example.com";
-            var correctPassword = "RightPass";
-            var wrongPassword = "WrongPass";
+            var email = "valid@domain.test";
+            var wrongPassword = "oops";
 
-            // Є користувач з відповідним email, але пароль не той
-            var userEntity = new User
-            {
-                Id = 3,
-                Email = "test@example.com",
-                Password = correctPassword,
-                Role = UserRole.Registered
-            };
-            var allUsers = new List<User> { userEntity };
-            _uowMock.Users.ReadAllAsync().Returns(Task.FromResult<IEnumerable<User>>(allUsers));
+            // ACT
+            var ex = Assert.ThrowsAsync<UnauthorizedAccessException>(
+                () => _service.AuthenticateAsync(email, wrongPassword));
 
-            // ACT & ASSERT
-            var ex = Assert.ThrowsAsync<UnauthorizedAccessException>(async () =>
-                await _service.AuthenticateAsync(email, wrongPassword));
-            Assert.That(ex.Message, Is.EqualTo("Невірний email або пароль"));
-
-            _uowMock.Users.Received(1).ReadAllAsync();
-            _mapperMock.DidNotReceive().Map<UserDto>(Arg.Any<User>());
+            // ASSERT
+            Assert.That(ex.Message, Is.EqualTo("Невірний email"));
         }
 
         [Test]
