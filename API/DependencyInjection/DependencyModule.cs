@@ -58,6 +58,23 @@ namespace API.DependencyInjection
                    .Named<IBookFilterStrategy>("title")
                    .InstancePerLifetimeScope();
 
+            // 3. BLL‐сервісиAdd commentMore actions
+            builder.RegisterType<BookService>()
+                   .As<IBookService>()
+                   .InstancePerLifetimeScope();
+            builder.RegisterType<OrderService>()
+                   .As<IOrderService>()
+                   .InstancePerLifetimeScope();
+            builder.RegisterType<GenreService>()
+                   .As<IGenreService>()
+                   .InstancePerLifetimeScope();
+            builder.RegisterType<UserService>()
+                   .As<IUserService>()
+                   .InstancePerLifetimeScope();
+            builder.RegisterType<BookTypeService>()
+                   .As<IBookTypeService>()
+                   .InstancePerLifetimeScope();
+
             // Контекст для вибору стратегії
             builder.RegisterType<BookFilterContext>()
                    .AsSelf()
