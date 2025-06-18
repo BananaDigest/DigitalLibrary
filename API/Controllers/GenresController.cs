@@ -2,6 +2,8 @@
 using AutoMapper;
 using BLL.DTOs;
 using BLL.Facade;
+using BLL.Interfaces;
+using BLL.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -13,11 +15,14 @@ namespace API.Controllers
     {
         private readonly ILibraryFacade _facade;
         private readonly IMapper _mapper;
+        private readonly IBookService _bookService;
 
-        public GenresController(ILibraryFacade facade, IMapper mapper)
+
+        public GenresController(ILibraryFacade facade, IMapper mapper, IBookService bookService)
         {
             _facade = facade;
             _mapper = mapper;
+            _bookService = bookService;
         }
 
         [HttpGet]
@@ -68,6 +73,15 @@ namespace API.Controllers
         [AllowAnonymous]
         public async Task<IActionResult> Delete(int id)
         {
+            var allBooks = await _bookService.ReadAllAsync();
+
+            bool genreInUse = allBooks.Any(book => book.GenreId == id);
+
+            if (genreInUse)
+            {
+                return BadRequest("Жанр не можна видалити, оскільки існують книги з цим жанром.");
+            }
+
             await _facade.DeleteGenreAsync(id);
             return NoContent();
         }

@@ -3,6 +3,8 @@ using AutoMapper;
 using BLL.DTOs;
 using BLL.Facade;
 using BLL.Interfaces;
+using BLL.Services;
+using Domain.Enums;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -14,11 +16,13 @@ namespace API.Controllers
     {
         private readonly ILibraryFacade _facade;
         private readonly IMapper _mapper;
+        private readonly IOrderService _orderService;
 
-        public BooksController(ILibraryFacade facade, IMapper mapper)
+        public BooksController(ILibraryFacade facade, IMapper mapper, IOrderService orderService)
         {
             _facade = facade;
             _mapper = mapper;
+            _orderService = orderService;
         }
 
         [HttpGet]
@@ -59,6 +63,19 @@ namespace API.Controllers
         [AllowAnonymous]
         public async Task<IActionResult> Delete(int id)
         {
+            var allOrders = await _orderService.ReadAllAsync();
+
+            bool hasActiveOrders = allOrders.Any(o =>
+                o.BookId == id && (
+                    o.Status == OrderStatus.NoPaper ||
+                    o.Status == OrderStatus.Awaiting ||
+                    o.Status == OrderStatus.WithUser));
+
+            if (hasActiveOrders)
+            {
+                return BadRequest("Книгу не можна видалити, оскільки вона має активні замовлення.");
+            }
+
             await _facade.DeleteBookAsync(id);
             return NoContent();
         }
